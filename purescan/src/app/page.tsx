@@ -113,6 +113,10 @@ export default function Home() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   {...getRootProps()}
+                  // Suppress Framer Drag Types to fix Vercel Build (Type 'DragEvent' is not assignable to 'MouseEvent | ...')
+                  onDrag={undefined}
+                  onDragStart={undefined}
+                  onDragEnd={undefined}
                   className={`
                         relative flex flex-col items-center justify-center text-center p-12 rounded-[2rem] cursor-pointer transition-all duration-300
                         border-2 border-dashed backdrop-blur-md shadow-2xl
