@@ -8,9 +8,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 
-// ADD THIS LINE TO DEBUG:
-console.log("DEBUG: The API Key is:", API_KEY);
-
 if (!API_KEY) {
     throw new Error("Gemini API Key is missing! Check your .env.local file.");
 }
