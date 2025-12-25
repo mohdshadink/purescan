@@ -10,6 +10,9 @@ import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 
+// Hack to fix Vercel build error with react-dropzone and framer-motion types
+const MotionDivAsAny = motion.div as any;
+
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -106,17 +109,13 @@ export default function Home() {
             <AnimatePresence mode="wait">
               {/* UPLOAD STATE */}
               {!result && !isLoading && (
-                <motion.div
+                <MotionDivAsAny
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   {...getRootProps()}
-                  // Suppress Framer Drag Types to fix Vercel Build (Type 'DragEvent' is not assignable to 'MouseEvent | ...')
-                  onDrag={undefined}
-                  onDragStart={undefined}
-                  onDragEnd={undefined}
                   className={`
                         relative flex flex-col items-center justify-center text-center p-12 rounded-[2rem] cursor-pointer transition-all duration-300
                         border-2 border-dashed backdrop-blur-md shadow-2xl
@@ -132,7 +131,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Tap to Analyze</h3>
                   <p className="text-gray-400 font-medium">Drag & drop or click to upload specimen</p>
-                </motion.div>
+                </MotionDivAsAny>
               )}
 
               {/* LOADING STATE */}
