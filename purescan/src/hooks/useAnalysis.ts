@@ -3,8 +3,21 @@
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// HARDCODE THE KEY TO FORCE IT TO WORK
-const API_KEY = "AIzaSyCqjtdriVHPApgSbiDqh88n37YHVhxExy8";
+// hooks/useAnalysis.ts
+
+// ... imports
+
+// OLD (Delete this):
+// const API_KEY = "AIzaSy..."; 
+
+// NEW (Use this):
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+if (!API_KEY) {
+    throw new Error("Gemini API Key is missing! Check your .env.local file.");
+}
+
+// ... rest of your code
 
 if (!API_KEY) {
     console.warn("Missing NEXT_PUBLIC_GEMINI_API_KEY in environment variables");
