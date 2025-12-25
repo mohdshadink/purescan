@@ -52,7 +52,7 @@ export default function ScoreGauge({ score, loading }: ScoreGaugeProps) {
                     strokeDashoffset={strokeDashoffset}
                     initial={{ strokeDashoffset: halfCircumference }}
                     animate={{ strokeDashoffset }}
-                    transition={{ duration: 1.5, ease: "outBack" }}
+                    transition={{ duration: 1.5, ease: "backOut" }}
                     style={{ filter: `drop-shadow(0 0 10px ${color})` }}
                 />
             </svg>

@@ -150,7 +150,7 @@ export default function Home() {
         {/* Footer */}
         <div className="flex justify-between items-center text-[10px] text-gray-600 font-scanner uppercase">
           <span>Sys.Status: ONLINE</span>
-          <span>Gemini Core v1.5 [CONNECTED]</span>
+          <span>Gemini Core v2.5 [CONNECTED]</span>
         </div>
 
       </div>
