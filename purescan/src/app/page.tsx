@@ -1,25 +1,43 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Moon, Sun } from "lucide-react";
+import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Moon, Sun, Camera } from "lucide-react";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
+import CameraModal from "@/components/CameraModal";
 
 // Hack to fix Vercel build error with react-dropzone and framer-motion types
 const MotionDivAsAny = motion.div as any;
+const MotionLabelAsAny = motion.label as any;
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { analyze, isLoading, error, result, clearError } = useAnalysis();
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
+  // Ref not strictly needed with label wrap, but keeping for safety if needed later, though removing direct click handler
+  // const cameraInputRef = useRef<HTMLInputElement>(null); // Removed unused ref
+
+  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      setFiles([file]);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(file));
+      clearError();
+      analyze([file]);
+      // Reset value to allow re-selection
+      event.target.value = '';
+    }
+  };
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -33,6 +51,14 @@ export default function Home() {
     },
     [analyze, clearError, previewUrl]
   );
+
+  const handleCapturedImage = (file: File) => {
+    setFiles([file]);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+    clearError();
+    analyze([file]);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -124,33 +150,53 @@ export default function Home() {
           </AnimatePresence>
 
           {/* Main Interaction Zone */}
-          <div className="w-full max-w-xl">
+          <div className="w-full max-w-2xl">
             <AnimatePresence mode="wait">
               {/* UPLOAD STATE */}
               {!result && !isLoading && (
-                <MotionDivAsAny
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  {...getRootProps()}
-                  className={`
-                        relative flex flex-col items-center justify-center text-center p-12 rounded-[2rem] cursor-pointer transition-all duration-300
-                        border-2 border-dashed backdrop-blur-md shadow-2xl bg-glass
-                        ${isDragActive
-                      ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10 shadow-[0_0_40px_rgba(74,222,128,0.3)]"
-                      : "border-[var(--card-border)] hover:border-[var(--color-primary)]/50 hover:shadow-lg"
-                    }
-                      `}
-                >
-                  <input {...getInputProps()} />
-                  <div className={`p-6 rounded-2xl bg-gradient-to-br from-[var(--gradient-start)]/20 to-[var(--gradient-end)]/20 mb-6 shadow-inner border border-white/5 ${isDragActive ? 'animate-bounce' : ''}`}>
-                    <UploadCloud className={`h-12 w-12 ${isDragActive ? 'text-[var(--color-primary)]' : 'text-gray-400'}`} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-[var(--foreground)] mb-2 tracking-tight">Tap to Analyze</h3>
-                  <p className="text-[var(--foreground)] opacity-60 font-medium">Drag & drop or click to upload specimen</p>
-                </MotionDivAsAny>
+                <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
+                  {/* CARD 1: File Upload */}
+                  <MotionDivAsAny
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    {...getRootProps()}
+                    className={`
+                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
+                      bg-white/5 backdrop-blur-md border border-white/10
+                      hover:shadow-[0_0_30px_rgba(74,222,128,0.2)] hover:border-green-500/30
+                      ${isDragActive ? 'ring-2 ring-green-500 bg-green-500/10' : ''}
+                    `}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="p-4 rounded-2xl bg-white/5 mb-4 shadow-inner border border-white/5 text-green-400">
+                      <UploadCloud className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
+                    <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
+                  </MotionDivAsAny>
+
+                  {/* CARD 2: Camera */}
+                  <MotionDivAsAny
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsCameraOpen(true)}
+                    className="
+                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
+                      bg-white/5 backdrop-blur-md border border-white/10
+                      hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:border-blue-500/30
+                    "
+                  >
+                    <div className="p-4 rounded-2xl bg-white/5 mb-4 shadow-inner border border-white/5 text-blue-400">
+                      <Camera className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
+                    <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
+                  </MotionDivAsAny>
+                </div>
               )}
 
               {/* LOADING STATE */}
@@ -235,6 +281,12 @@ export default function Home() {
           </div>
 
           {error && <ErrorMessage message={error} />}
+
+          <CameraModal
+            isOpen={isCameraOpen}
+            onClose={() => setIsCameraOpen(false)}
+            onCapture={handleCapturedImage}
+          />
 
         </div>
       </div>
