@@ -84,7 +84,7 @@ export default function Home() {
           className="text-center space-y-4 max-w-3xl"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-glass border border-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[var(--color-primary)] shadow-lg">
-            <Zap size={12} className="fill-current" /> Bio-Organic Analysis v2.5
+            <Zap size={12} className="fill-current" /> Bio-Organic Analysis v1.0
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight pb-2">
