@@ -39,11 +39,24 @@ export default function Home() {
     }
   };
 
+  const activeTheme = isDarkMode ? "dark" : "light";
+
+  // Background Glow Logic
+  const getBackgroundGlow = () => {
+    if (!result) return "";
+    if (result.score > 70) return "bg-[radial-gradient(circle_at_center,_rgba(34,197,94,0.15)_0%,_transparent_70%)] transition-colors duration-700";
+    if (result.score < 40) return "bg-[radial-gradient(circle_at_center,_rgba(239,68,68,0.15)_0%,_transparent_70%)] transition-colors duration-700";
+    return "";
+  };
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setFiles(acceptedFiles);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       if (acceptedFiles.length > 0) {
+        if (typeof window !== 'undefined' && window.navigator.vibrate) {
+          window.navigator.vibrate(50);
+        }
         setPreviewUrl(URL.createObjectURL(acceptedFiles[0]));
         clearError();
         analyze(acceptedFiles);
@@ -53,13 +66,16 @@ export default function Home() {
   );
 
   const handleCapturedImage = (file: File) => {
+    if (typeof window !== 'undefined' && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+    setIsCameraOpen(false);
     setFiles([file]);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(file));
     clearError();
     analyze([file]);
   };
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
@@ -164,13 +180,16 @@ export default function Home() {
                     {...getRootProps()}
                     className={`
                       flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
-                      bg-white/5 backdrop-blur-md border border-white/10
-                      hover:shadow-[0_0_30px_rgba(74,222,128,0.2)] hover:border-green-500/30
+                      backdrop-blur-md border 
+                      ${isDarkMode
+                        ? 'bg-white/5 border-white/10 hover:shadow-[0_0_30px_rgba(74,222,128,0.2)] hover:border-green-500/30'
+                        : 'bg-white border-gray-200 shadow-xl hover:shadow-2xl hover:border-green-500/50'
+                      }
                       ${isDragActive ? 'ring-2 ring-green-500 bg-green-500/10' : ''}
                     `}
                   >
                     <input {...getInputProps()} />
-                    <div className="p-4 rounded-2xl bg-white/5 mb-4 shadow-inner border border-white/5 text-green-400">
+                    <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
                       <UploadCloud className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
@@ -184,13 +203,16 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setIsCameraOpen(true)}
-                    className="
+                    className={`
                       flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
-                      bg-white/5 backdrop-blur-md border border-white/10
-                      hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:border-blue-500/30
-                    "
+                      backdrop-blur-md border
+                      ${isDarkMode
+                        ? 'bg-white/5 border-white/10 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:border-blue-500/30'
+                        : 'bg-white border-gray-200 shadow-xl hover:shadow-2xl hover:border-blue-500/50'
+                      }
+                    `}
                   >
-                    <div className="p-4 rounded-2xl bg-white/5 mb-4 shadow-inner border border-white/5 text-blue-400">
+                    <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
                       <Camera className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
@@ -220,9 +242,14 @@ export default function Home() {
               {result && (
                 <motion.div
                   key="result"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="w-full bg-glass rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`
+                    w-full bg-white/5 backdrop-blur-xl rounded-3xl p-8 border 
+                    ${result.score >= 70 ? 'border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.1)]' :
+                      result.score < 40 ? 'border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.1)]' :
+                        'border-white/10'}
+                  `}
                 >
                   {/* Background Gradient for result card */}
                   <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${result.score >= 70 ? 'from-green-500/20' : result.score >= 30 ? 'from-yellow-500/20' : 'from-red-500/20'} to-transparent blur-3xl -z-10`} />

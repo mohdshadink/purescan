@@ -142,6 +142,36 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                                 />
                             )}
 
+                            {/* Scanner Overlays */}
+                            {!permissionError && stream && (
+                                <>
+                                    {/* Laser Line Animation */}
+                                    <motion.div
+                                        initial={{ top: "0%" }}
+                                        animate={{ top: "100%" }}
+                                        transition={{
+                                            repeat: Infinity,
+                                            duration: 2,
+                                            ease: "linear",
+                                            repeatType: "reverse"
+                                        }}
+                                        className="absolute left-0 right-0 h-0.5 bg-green-500/80 shadow-[0_0_15px_rgba(34,197,94,0.8)] z-10"
+                                    />
+
+                                    {/* Telemetry Data */}
+                                    <div className="absolute top-4 left-4 z-20 font-mono text-xs text-green-500/80 tracking-widest">
+                                        SENSING...
+                                    </div>
+                                    <div className="absolute bottom-4 right-4 z-20 font-mono text-xs text-green-500/80 tracking-widest">
+                                        BIO_SIGNAL: STABLE
+                                    </div>
+
+                                    {/* Corner Brackets */}
+                                    <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-white/20 rounded-tr-lg" />
+                                    <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-white/20 rounded-bl-lg" />
+                                </>
+                            )}
+
                             {permissionError && (
                                 <div className="text-center p-8 text-white/50">
                                     <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
