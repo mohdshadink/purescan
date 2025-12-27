@@ -9,10 +9,17 @@ if (!API_KEY) {
     console.warn("Missing NEXT_PUBLIC_GEMINI_API_KEY");
 }
 
-type AnalysisResult = {
+export interface AnalysisResult {
     score: number;
-    status: string;
+    status: 'Safe' | 'Moderate' | 'Hazardous';
     details: string;
+    // Granular Metrics for Radar Chart
+    metrics: {
+        toxicity: number; // 0-100 (High is bad)
+        processing: number; // 0-100 (High is processed)
+        nutrition: number; // 0-100 (High is nutritious)
+        freshness: number; // 0-100 (High is fresh)
+    };
 };
 
 export function useAnalysis() {
@@ -57,12 +64,31 @@ export function useAnalysis() {
                 },
             };
 
-            const prompt = `Role: You are a Bio-Organic Food Safety Expert. 
-            Task: Analyze the provided image.
-            1. Determine if the image contains food or an ingredients list.
-            2. If it is NOT food (e.g., a screenshot of an app, a car, a person, or a blank photo), return exactly this JSON: { "score": -1, "status": "Invalid", "details": "No food detected. Please upload a clear photo of food or an ingredients label." }
-            3. If it IS food, perform the quality analysis as usual and return: { "score": number (0-100), "status": string, "details": string }.
-            Return ONLY valid JSON.`;
+            const prompt = `
+        Analyze this image of food/ingredient. 
+        You are a bio-organic quality inspector. 
+        
+        Strictly output valid JSON only. No markdown formatting. No extra text.
+        Structure:
+        {
+          "score": number (0-100, where 100 is perfectly natural/organic/safe, 0 is highly toxic/processed),
+          "status": string ("Safe", "Moderate", or "Hazardous"),
+          "details": string (Concise analysis of ingredients, additives, processing level, and health impact. Max 2 sentences.),
+          "metrics": {
+              "toxicity": number (0-100, perceived toxicity/harmful additives),
+              "processing": number (0-100, level of industrial processing),
+              "nutrition": number (0-100, nutrient density estimate),
+              "freshness": number (0-100, visual freshness estimate)
+          }
+        }
+        
+        If the image is NOT food, return:
+        {
+          "score": 0,
+          "status": "Hazardous",
+          "details": "No food detected. Please assume this item is inedible or upload a valid food image for analysis.",
+          "metrics": { "toxicity": 100, "processing": 100, "nutrition": 0, "freshness": 0 }
+        }`;
 
             const result = await model.generateContent([prompt, imagePart]);
             const response = await result.response;
@@ -75,6 +101,7 @@ export function useAnalysis() {
                 score: typeof data.score === 'number' ? data.score : 0,
                 status: data.status || "Unknown",
                 details: data.details || "Analysis complete.",
+                metrics: data.metrics || { toxicity: 0, processing: 0, nutrition: 0, freshness: 0 }
             });
 
         } catch (err) {

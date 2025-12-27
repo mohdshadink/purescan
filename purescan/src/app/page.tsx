@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 import CameraModal from "@/components/CameraModal";
+import HolographicCard from "@/components/HolographicCard";
+import { useVoice } from "@/hooks/useVoice";
 
 // Hack to fix Vercel build error with react-dropzone and framer-motion types
 const MotionDivAsAny = motion.div as any;
@@ -21,6 +23,15 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { analyze, isLoading, error, result, clearError } = useAnalysis();
+  const { speak } = useVoice();
+
+  // Voice synthesis effect on result
+  useEffect(() => {
+    if (result && !isLoading) {
+      const summary = `Analysis Complete. Bio Safety Score: ${result.score}. Status: ${result.status}`;
+      speak(summary);
+    }
+  }, [result, isLoading, speak]);
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
   // Ref not strictly needed with label wrap, but keeping for safety if needed later, though removing direct click handler
@@ -172,52 +183,47 @@ export default function Home() {
               {!result && !isLoading && (
                 <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
                   {/* CARD 1: File Upload */}
-                  <MotionDivAsAny
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    {...getRootProps()}
+                  <HolographicCard
+                    onClick={getRootProps().onClick}
+                    isActive={isDragActive}
                     className={`
-                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
-                      backdrop-blur-md border 
+                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
                       ${isDarkMode
-                        ? 'bg-white/5 border-white/10 hover:shadow-[0_0_30px_rgba(74,222,128,0.2)] hover:border-green-500/30'
-                        : 'bg-white border-gray-200 shadow-xl hover:shadow-2xl hover:border-green-500/50'
+                        ? 'bg-white/5 border border-white/10'
+                        : 'bg-white border border-gray-200 shadow-xl'
                       }
-                      ${isDragActive ? 'ring-2 ring-green-500 bg-green-500/10' : ''}
                     `}
                   >
-                    <input {...getInputProps()} />
-                    <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
-                      <UploadCloud className="h-8 w-8" />
+                    {/* Inner content */}
+                    <div {...getRootProps()} className="flex flex-col items-center">
+                      <input {...getInputProps()} />
+                      <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
+                        <UploadCloud className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
+                      <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
                     </div>
-                    <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
-                    <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
-                  </MotionDivAsAny>
+                  </HolographicCard>
 
                   {/* CARD 2: Camera */}
-                  <MotionDivAsAny
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
+                  <HolographicCard
                     onClick={() => setIsCameraOpen(true)}
                     className={`
-                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer transition-all duration-300
-                      backdrop-blur-md border
+                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
                       ${isDarkMode
-                        ? 'bg-white/5 border-white/10 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:border-blue-500/30'
-                        : 'bg-white border-gray-200 shadow-xl hover:shadow-2xl hover:border-blue-500/50'
+                        ? 'bg-white/5 border border-white/10'
+                        : 'bg-white border border-gray-200 shadow-xl'
                       }
                     `}
                   >
-                    <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
-                      <Camera className="h-8 w-8" />
+                    <div className="flex flex-col items-center">
+                      <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
+                        <Camera className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
+                      <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
                     </div>
-                    <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
-                    <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
-                  </MotionDivAsAny>
+                  </HolographicCard>
                 </div>
               )}
 
@@ -287,6 +293,28 @@ export default function Home() {
                       <span className="text-green-500">Premium</span>
                     </div>
                   </div>
+
+                  {/* Granular Metrics Radar (Viz) */}
+                  {result.metrics && (
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                      {Object.entries(result.metrics).map(([key, value]) => (
+                        <div key={key} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col gap-2">
+                          <span className="text-[10px] uppercase tracking-widest opacity-60 font-bold">{key}</span>
+                          <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${value}%` }}
+                              className={`h-full rounded-full ${key === 'toxicity' ? 'bg-red-500' :
+                                key === 'processing' ? 'bg-yellow-500' :
+                                  key === 'nutrition' ? 'bg-green-500' : 'bg-blue-500'
+                                }`}
+                            />
+                          </div>
+                          <span className="text-xs font-mono self-end">{value}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Details */}
                   <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-8 hover:bg-white/10 transition-colors">
