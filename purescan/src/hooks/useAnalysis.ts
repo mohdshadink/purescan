@@ -57,15 +57,12 @@ export function useAnalysis() {
                 },
             };
 
-            const prompt = `Analyze this food image for bio-organic freshness and safety. 
-            Return valid JSON with this structure: { "score": number (0-100), "status": string (Hazardous, Poor, Fair, Good, Excellent), "details": string }. 
-            
-            SCORING RULES:
-            - Base 50% of the score on visible freshness/safety.
-            - Base 50% of the score on nutritional/bio-organic value.
-            - Always explain which factor lowered the score in the 'details'.
-            
-            Do NOT use religious terminology like Halal or Haram.`;
+            const prompt = `Role: You are a Bio-Organic Food Safety Expert. 
+            Task: Analyze the provided image.
+            1. Determine if the image contains food or an ingredients list.
+            2. If it is NOT food (e.g., a screenshot of an app, a car, a person, or a blank photo), return exactly this JSON: { "score": -1, "status": "Invalid", "details": "No food detected. Please upload a clear photo of food or an ingredients label." }
+            3. If it IS food, perform the quality analysis as usual and return: { "score": number (0-100), "status": string, "details": string }.
+            Return ONLY valid JSON.`;
 
             const result = await model.generateContent([prompt, imagePart]);
             const response = await result.response;
