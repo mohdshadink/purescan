@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { saveScan } from "@/app/actions";
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -102,6 +103,14 @@ export function useAnalysis() {
                 status: data.status || "Unknown",
                 details: data.details || "Analysis complete.",
                 metrics: data.metrics || { toxicity: 0, processing: 0, nutrition: 0, freshness: 0 }
+            });
+
+            // Save to database
+            await saveScan({
+                foodName: "Scanned Item", // Gemini doesn't always return a name, could improve this later
+                score: typeof data.score === 'number' ? data.score : 0,
+                analysis: data.details || "Analysis complete.",
+                imageUrl: base64Data
             });
 
         } catch (err) {
