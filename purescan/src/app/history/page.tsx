@@ -39,19 +39,19 @@ export default async function HistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white p-8 font-[family-name:var(--font-geist-sans)]">
-            <h1 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+        <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)] transition-colors duration-500">
+            <h1 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]">
                 Scan History
             </h1>
 
             {rows.length === 0 ? (
-                <p className="text-zinc-400">No scans found. Start analyzing your food!</p>
+                <p className="text-[var(--foreground)] opacity-60">No scans found. Start analyzing your food!</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {rows.map((scan) => (
                         <div
                             key={scan.id}
-                            className="border border-zinc-800 bg-zinc-900/50 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors"
+                            className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
                         >
                             <div className="relative h-48 w-full">
                                 <Image
@@ -63,22 +63,22 @@ export default async function HistoryPage() {
                             </div>
                             <div className="p-4">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h2 className="text-xl font-semibold">{scan.foodname}</h2>
+                                    <h2 className="text-xl font-semibold text-[var(--foreground)]">{scan.foodname}</h2>
                                     <span
                                         className={`px-2 py-1 rounded text-xs font-bold ${scan.score > 70
-                                            ? "bg-green-500/20 text-green-400"
+                                            ? "bg-green-500/20 text-green-500"
                                             : scan.score > 40
-                                                ? "bg-yellow-500/20 text-yellow-400"
-                                                : "bg-red-500/20 text-red-400"
+                                                ? "bg-yellow-500/20 text-yellow-500"
+                                                : "bg-red-500/20 text-red-500"
                                             }`}
                                     >
                                         {scan.score}/100
                                     </span>
                                 </div>
-                                <p className="text-sm text-zinc-400 line-clamp-3">
+                                <p className="text-sm text-[var(--foreground)] opacity-70 line-clamp-3">
                                     {scan.analysis}
                                 </p>
-                                <div className="mt-4 text-xs text-zinc-500">
+                                <div className="mt-4 text-xs text-[var(--foreground)] opacity-50">
                                     {new Date(scan.createdat).toLocaleDateString()}
                                 </div>
                             </div>

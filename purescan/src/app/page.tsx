@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Moon, Sun, Camera } from "lucide-react";
 import { useAnalysis } from "@/hooks/useAnalysis";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 import CameraModal from "@/components/CameraModal";
 import HolographicCard from "@/components/HolographicCard";
 import { useVoice } from "@/hooks/useVoice";
+import { useTheme } from "next-themes";
 
 // Hack to fix Vercel build error with react-dropzone and framer-motion types
 const MotionDivAsAny = motion.div as any;
@@ -20,10 +20,16 @@ const MotionLabelAsAny = motion.label as any;
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { analyze, isLoading, error, result, clearError } = useAnalysis();
   const { speak } = useVoice();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Voice synthesis effect on result
   useEffect(() => {
@@ -33,7 +39,8 @@ export default function Home() {
     }
   }, [result, isLoading, speak]);
 
-  const toggleTheme = () => setIsDarkMode((prev) => !prev);
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
   // Ref not strictly needed with label wrap, but keeping for safety if needed later, though removing direct click handler
   // const cameraInputRef = useRef<HTMLInputElement>(null); // Removed unused ref
 
@@ -50,7 +57,7 @@ export default function Home() {
     }
   };
 
-  const activeTheme = isDarkMode ? "dark" : "light";
+  const isDarkMode = theme === 'dark' || !theme; // Default to dark safe
 
   // Background Glow Logic
   const getBackgroundGlow = () => {
@@ -102,22 +109,14 @@ export default function Home() {
     window.location.reload();
   };
 
+  if (!mounted) return null; // Avoid hydration mismatch
+
   return (
-    <main className={`flex min-h-screen flex-col items-center relative overflow-hidden font-sans transition-colors duration-500 ${!isDarkMode ? 'light' : ''}`}
+    <main className="flex min-h-screen flex-col items-center relative overflow-hidden font-sans transition-colors duration-500 -mt-16 pt-16"
       style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
 
       {/* Theme Toggle (Absolute Top Right) */}
-      <button
-        onClick={toggleTheme}
-        className="absolute top-6 right-6 z-50 p-3 rounded-full bg-glass hover:bg-white/10 transition-all border border-white/10 shadow-lg group"
-        aria-label="Toggle Theme"
-      >
-        {isDarkMode ? (
-          <Sun className="h-6 w-6 text-yellow-400 group-hover:rotate-90 transition-transform" />
-        ) : (
-          <Moon className="h-6 w-6 text-indigo-600 group-hover:-rotate-12 transition-transform" />
-        )}
-      </button>
+
 
       {/* Dynamic Background Blobs */}
       <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
@@ -125,7 +124,8 @@ export default function Home() {
       <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
 
-      <Navbar />
+      {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
+      {/* Keeping empty space if needed or just removing it since Layout has header now */}
 
       <div className="flex-1 w-full max-w-5xl flex flex-col items-center justify-center space-y-10 z-10 px-4 py-8 md:py-12">
 

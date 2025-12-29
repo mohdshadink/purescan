@@ -11,6 +11,8 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
+import { Providers } from "./providers";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,30 +36,33 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="flex h-16 items-center justify-between px-6 z-50 relative">
-            <div className="flex items-center gap-6">
-              <SignedIn>
-                <Link href="/history" className="text-sm font-medium hover:text-green-400 transition-colors">
-                  History
-                </Link>
-              </SignedIn>
-            </div>
+          <Providers>
+            <header className="flex h-16 items-center justify-between px-6 z-50 relative">
+              <div className="flex items-center gap-6">
+                <SignedIn>
+                  <Link href="/history" className="text-sm font-medium hover:text-green-400 transition-colors">
+                    History
+                  </Link>
+                </SignedIn>
+              </div>
 
-            <div className="flex items-center gap-4">
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-              <SignedOut>
-                <SignInButton mode="modal" />
-                <SignUpButton mode="modal" />
-              </SignedOut>
-            </div>
-          </header>
-          {children}
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal" />
+                  <SignUpButton mode="modal" />
+                </SignedOut>
+              </div>
+            </header>
+            {children}
+          </Providers>
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-9E0060BH7S"
             strategy="afterInteractive"
