@@ -45,10 +45,14 @@ export function useAnalysis() {
             }
 
             const genAI = new GoogleGenerativeAI(API_KEY);
-            // User explicitly requested gemini-2.5-flash with low temperature for consistency
+            // Deterministic Generation Config (Greedy Decoding)
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.5-flash",
-                generationConfig: { temperature: 0.1 }
+                generationConfig: {
+                    temperature: 0.0,
+                    topK: 1,
+                    topP: 0.1,
+                }
             });
 
             const base64Data = await new Promise<string>((resolve, reject) => {
@@ -67,20 +71,24 @@ export function useAnalysis() {
 
             const prompt = `
         Analyze this image of food/ingredient. 
-        You are a "Firm but Fair Nutritional Analyst". 
+        You are a Deterministic Nutritional Algo.
         
         Strictly output valid JSON only. No markdown formatting. No extra text.
         
-        SCORING LOGIC:
-        1. Ultra-Processed/Sugar-Bombs (Soda, Candy, Cheap Cake): STRICT. Score 20-50.
-        2. Cooked Meals (Burgers, Pasta, Pizza, Home Cooking): LENIENT. If it has protein/fiber/real ingredients, give credit. Score 50-75. Acknowledge energy value.
-        3. Whole Foods (Salads, Fruits, Grilled Meat, Vegetables): PREMIUM. Score 85-100.
+        SCORING ALGORITHM (Start at 100):
+        - High Sugar (Visible icing/syrup/candy): DEDUCT 30 points.
+        - Ultra-Processed (Package/Artificial colors/Fast Food wrapper): DEDUCT 20 points.
+        - Fried/Greasy (Visible oil/deep fried): DEDUCT 15 points.
+        - Unknown Additives ( sauces/mixed sludge): DEDUCT 10 points.
+        - BONUSES: Add +5 points ONLY if visible whole fruit/nuts/leaves are the MAIN component.
+        
+        *Ensure the final score reflects these deductions.*
         
         Structure:
         {
-          "score": number (0-100 based on logic above),
-          "status": string ("Safe", "Moderate", or "Hazardous"),
-          "details": string (Concise analysis. Be firm about grease/sugar but fair about satiety/energy. Max 2 sentences.),
+          "score": number (Calculated score based on rubric),
+          "status": string ("Safe" > 70, "Moderate" 40-70, "Hazardous" < 40),
+          "details": string (List the deductions made. E.g., "Started at 100. -15 for grease. -20 for processing. Final: 65."),
           "metrics": {
               "toxicity": number (0-100, perceived toxicity/harmful additives),
               "processing": number (0-100, level of industrial processing),
@@ -93,7 +101,7 @@ export function useAnalysis() {
         {
           "score": 0,
           "status": "Hazardous",
-          "details": "No food detected. Please assume this item is inedible or upload a valid food image for analysis.",
+          "details": "No food detected.",
           "metrics": { "toxicity": 100, "processing": 100, "nutrition": 0, "freshness": 0 }
         }`;
 
