@@ -38,13 +38,17 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="flex h-16 items-center justify-between border-b px-6">
-            <div className="font-bold text-lg">PureScan</div>
-            <div className="flex items-center gap-4">
+          <header className="flex h-16 items-center justify-between px-6 z-50 relative">
+            <div className="flex items-center gap-6">
               <SignedIn>
-                <Link href="/history" className="text-sm font-medium hover:underline">
+                <Link href="/history" className="text-sm font-medium hover:text-green-400 transition-colors">
                   History
                 </Link>
+              </SignedIn>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <SignedIn>
                 <UserButton />
               </SignedIn>
               <SignedOut>
