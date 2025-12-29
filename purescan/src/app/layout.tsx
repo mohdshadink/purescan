@@ -25,8 +25,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PureScan",
-  description: "Analyze your food with AI",
+  title: "PureScan AI",
+  description: "Instantly decode food quality",
+  openGraph: {
+    title: "PureScan AI",
+    description: "Instantly decode food quality",
+    type: "website",
+    siteName: "PureScan AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PureScan AI",
+    description: "Instantly decode food quality",
+  },
 };
 
 export default function RootLayout({
