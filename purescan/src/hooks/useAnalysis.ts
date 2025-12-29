@@ -67,14 +67,20 @@ export function useAnalysis() {
 
             const prompt = `
         Analyze this image of food/ingredient. 
-        You are a bio-organic quality inspector. 
+        You are a "Firm but Fair Nutritional Analyst". 
         
         Strictly output valid JSON only. No markdown formatting. No extra text.
+        
+        SCORING LOGIC:
+        1. Ultra-Processed/Sugar-Bombs (Soda, Candy, Cheap Cake): STRICT. Score 20-50.
+        2. Cooked Meals (Burgers, Pasta, Pizza, Home Cooking): LENIENT. If it has protein/fiber/real ingredients, give credit. Score 50-75. Acknowledge energy value.
+        3. Whole Foods (Salads, Fruits, Grilled Meat, Vegetables): PREMIUM. Score 85-100.
+        
         Structure:
         {
-          "score": number (0-100, where 100 is perfectly natural/organic/safe, 0 is highly toxic/processed),
+          "score": number (0-100 based on logic above),
           "status": string ("Safe", "Moderate", or "Hazardous"),
-          "details": string (Concise analysis of ingredients, additives, processing level, and health impact. Max 2 sentences.),
+          "details": string (Concise analysis. Be firm about grease/sugar but fair about satiety/energy. Max 2 sentences.),
           "metrics": {
               "toxicity": number (0-100, perceived toxicity/harmful additives),
               "processing": number (0-100, level of industrial processing),
