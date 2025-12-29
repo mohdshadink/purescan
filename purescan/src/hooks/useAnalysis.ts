@@ -105,13 +105,16 @@ export function useAnalysis() {
                 metrics: data.metrics || { toxicity: 0, processing: 0, nutrition: 0, freshness: 0 }
             });
 
-            // Save to database
-            await saveScan({
-                foodName: "Scanned Item", // Gemini doesn't always return a name, could improve this later
+
+            // Save to database (Fire and forget - don't block UI)
+            console.log("Saving scan result...");
+            saveScan({
+                foodName: "Scanned Item",
                 score: typeof data.score === 'number' ? data.score : 0,
                 analysis: data.details || "Analysis complete.",
                 imageUrl: base64Data
-            });
+            }).then(res => console.log("Save complete:", res))
+                .catch(e => console.error("Background save failed:", e));
 
         } catch (err) {
             console.error(err);

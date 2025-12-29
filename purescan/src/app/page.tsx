@@ -69,6 +69,7 @@ export default function Home() {
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      console.log("Mobile upload started", acceptedFiles[0]?.name); // Debug log
       setFiles(acceptedFiles);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       if (acceptedFiles.length > 0) {
@@ -196,7 +197,18 @@ export default function Home() {
                   >
                     {/* Inner content */}
                     <div className="flex flex-col items-center">
-                      <input {...getInputProps()} />
+                      <input
+                        {...getInputProps()}
+                        ref={(el) => {
+                          // Merge refs: react-dropzone's ref + our stable ref check
+                          // @ts-ignore - Dropzone ref is internal but we need to ensure stability
+                          getInputProps().ref(el);
+                        }}
+                        onClick={(e) => {
+                          // Prevent double-firing on mobile
+                          e.stopPropagation();
+                        }}
+                      />
                       <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
                         <UploadCloud className="h-8 w-8" />
                       </div>
