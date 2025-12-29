@@ -199,11 +199,6 @@ export default function Home() {
                     <div className="flex flex-col items-center">
                       <input
                         {...getInputProps()}
-                        ref={(el) => {
-                          // Merge refs: react-dropzone's ref + our stable ref check
-                          // @ts-ignore - Dropzone ref is internal but we need to ensure stability
-                          getInputProps().ref(el);
-                        }}
                         onClick={(e) => {
                           // Prevent double-firing on mobile
                           e.stopPropagation();
