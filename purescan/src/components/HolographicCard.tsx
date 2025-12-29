@@ -2,14 +2,12 @@
 
 import React, { useRef, useState } from "react";
 
-interface HolographicCardProps {
+interface HolographicCardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
-    className?: string;
-    onClick?: React.MouseEventHandler<HTMLDivElement>;
     isActive?: boolean;
 }
 
-export default function HolographicCard({ children, className = "", onClick, isActive }: HolographicCardProps) {
+export default function HolographicCard({ children, className = "", isActive, ...props }: HolographicCardProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg)");
     const [sheenPosition, setSheenPosition] = useState("50% 50%");
@@ -27,23 +25,25 @@ export default function HolographicCard({ children, className = "", onClick, isA
         const rotateX = -y * 20;
 
         setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
-
-        // Sheen calculations
         setSheenPosition(`${50 + x * 100}% ${50 + y * 100}%`);
         setSheenOpacity(0.3 + Math.abs(x) * 0.5); // More visible at edges
+
+        // Call original handler if exists
+        props.onMouseMove?.(e);
     };
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
         setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
         setSheenOpacity(0);
+        props.onMouseLeave?.(e);
     };
 
     return (
         <div
             ref={ref}
+            {...props}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            onClick={onClick}
             className={`relative transition-all duration-200 ease-out transform-gpu ${className} ${isActive ? 'scale-95' : ''}`}
             style={{
                 transform,

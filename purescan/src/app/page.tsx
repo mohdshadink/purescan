@@ -184,7 +184,7 @@ export default function Home() {
                 <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
                   {/* CARD 1: File Upload */}
                   <HolographicCard
-                    onClick={getRootProps().onClick}
+                    {...getRootProps()}
                     isActive={isDragActive}
                     className={`
                       flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
@@ -195,7 +195,7 @@ export default function Home() {
                     `}
                   >
                     {/* Inner content */}
-                    <div {...getRootProps()} className="flex flex-col items-center">
+                    <div className="flex flex-col items-center">
                       <input {...getInputProps()} />
                       <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
                         <UploadCloud className="h-8 w-8" />
