@@ -49,7 +49,7 @@ export function useAnalysis() {
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.5-flash",
                 generationConfig: {
-                    temperature: 0.0,
+                    temperature: 0.1,
                     topK: 1,
                     topP: 0.1,
                 }

@@ -4,6 +4,13 @@ import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Upload, ImageIcon } from "lucide-react";
 
+declare global {
+    interface Window {
+        gtag?: (...args: unknown[]) => void;
+    }
+}
+
+
 interface ImageUploadProps {
     onImageSelect: (file: File) => void;
     disabled?: boolean;
@@ -14,8 +21,29 @@ export default function ImageUpload({ onImageSelect, disabled }: ImageUploadProp
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
+    const formatFileSize = (bytes: number): string => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    };
+
     const handleFile = (file: File) => {
         if (file && file.type.startsWith("image/")) {
+            // Analytics: Track image upload size
+            const fileSizeBytes = file.size;
+            const fileSizeFormatted = formatFileSize(fileSizeBytes);
+
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'image_upload', {
+                    event_category: 'engagement',
+                    event_label: file.type,
+                    file_size_bytes: fileSizeBytes,
+                    file_size_formatted: fileSizeFormatted,
+                });
+            }
+
+            console.log(`[Analytics] Image uploaded: ${fileSizeFormatted} (${fileSizeBytes} bytes)`);
+
             const reader = new FileReader();
             reader.onload = (e) => setPreview(e.target?.result as string);
             reader.readAsDataURL(file);
