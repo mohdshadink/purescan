@@ -22,7 +22,6 @@ export interface AnalysisResult {
         freshness: number; // 0-100 (High is fresh)
     };
 };
-
 export function useAnalysis() {
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
