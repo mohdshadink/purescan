@@ -49,17 +49,28 @@ export function useAnalysis() {
                 }
             });
 
-            const base64Data = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+            // Convert any image format (AVIF, WebP, etc.) to JPEG for API compatibility
+            const objectUrl = URL.createObjectURL(file);
+            const image = new Image();
+            image.src = objectUrl;
+            await image.decode(); // Wait for image to fully load (better AVIF support)
+
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                URL.revokeObjectURL(objectUrl);
+                throw new Error('Failed to get canvas context');
+            }
+            ctx.drawImage(image, 0, 0);
+            const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+            URL.revokeObjectURL(objectUrl); // Clean up
 
             const imagePart = {
                 inlineData: {
                     data: base64Data.split(",")[1],
-                    mimeType: file.type,
+                    mimeType: 'image/jpeg', // Always JPEG after conversion
                 },
             };
 

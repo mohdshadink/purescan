@@ -120,9 +120,9 @@ export default function Home() {
 
 
       {/* Dynamic Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/40 dark:bg-emerald-900/40" />
-      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/40 dark:bg-indigo-900/40" />
-      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/40 dark:bg-purple-900/40" />
+      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/60 dark:bg-emerald-900/40" />
+      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/60 dark:bg-indigo-900/40" />
+      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/60 dark:bg-purple-900/40" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
 
       {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
@@ -257,7 +257,7 @@ export default function Home() {
                   key="result"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full rounded-3xl p-8 bg-white/80 backdrop-blur-md shadow-xl border border-gray-200 dark:bg-gray-800/80 dark:border-gray-700 dark:shadow-none"
+                  className="w-full rounded-3xl p-8 bg-white shadow-2xl ring-1 ring-gray-900/10 dark:bg-gray-900/50 dark:border dark:border-gray-800 dark:shadow-none dark:ring-0 text-gray-900 dark:text-white"
                 >
                   {/* Title Header */}
                   <h2 className="text-3xl md:text-4xl font-extrabold text-[var(--foreground)] mb-4">
