@@ -113,22 +113,22 @@ export default function Home() {
   if (!mounted) return null; // Avoid hydration mismatch
 
   return (
-    <main className="flex min-h-screen flex-col items-center relative overflow-hidden font-sans transition-colors duration-500 -mt-16 pt-16"
-      style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+    <main className="flex min-h-screen flex-col items-center relative isolate overflow-hidden font-sans transition-colors duration-700 ease-in-out -mt-16 pt-16"
+      style={{ color: 'var(--foreground)' }}>
 
       {/* Theme Toggle (Absolute Top Right) */}
 
 
       {/* Dynamic Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/50 dark:bg-emerald-900/40" />
-      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/50 dark:bg-indigo-900/40" />
-      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/50 dark:bg-purple-900/40" />
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
+      <div className="fixed top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-indigo-500/60 dark:bg-emerald-500/20 -z-50" />
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-fuchsia-500/60 dark:bg-purple-500/20 -z-50" />
+      <div className="fixed bottom-0 left-1/4 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-indigo-500/60 dark:bg-emerald-500/20 -z-50" />
+      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none -z-50" />
 
       {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
       {/* Keeping empty space if needed or just removing it since Layout has header now */}
 
-      <div className="flex-1 w-full max-w-5xl flex flex-col items-center justify-center space-y-10 z-10 px-4 py-8 md:py-12">
+      <div className="flex-1 w-full max-w-5xl flex flex-col items-center justify-center space-y-10 relative z-10 px-4 py-8 md:py-12">
 
         {/* Modern Header */}
         <motion.div
