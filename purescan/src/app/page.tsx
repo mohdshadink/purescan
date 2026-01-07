@@ -186,7 +186,6 @@ export default function Home() {
                 <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
                   {/* CARD 1: File Upload */}
                   <HolographicCard
-                    {...getRootProps()}
                     isActive={isDragActive}
                     className={`
                       flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
@@ -196,8 +195,8 @@ export default function Home() {
                       }
                     `}
                   >
-                    {/* Inner content */}
-                    <div className="flex flex-col items-center">
+                    {/* Inner content with dropzone */}
+                    <div {...getRootProps()} className="flex flex-col items-center w-full h-full justify-center">
                       <input
                         {...getInputProps()}
                         onClick={(e) => {

@@ -2,15 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import Link from "next/link";
 import { Providers } from "./providers";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -46,49 +37,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <Providers>
-            <header className="flex h-16 items-center justify-between px-6 z-50 relative">
-              <div className="flex items-center gap-6">
-                <SignedIn>
-                  <Link href="/history" className="text-sm font-medium hover:text-green-400 transition-colors">
-                    History
-                  </Link>
-                </SignedIn>
-              </div>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>
+          <header className="flex h-16 items-center justify-end px-6 z-50 relative">
+            <ThemeToggle />
+          </header>
+          {children}
+        </Providers>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-9E0060BH7S"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-              <div className="flex items-center gap-4">
-                <ThemeToggle />
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-                <SignedOut>
-                  <SignInButton mode="modal" />
-                  <SignUpButton mode="modal" />
-                </SignedOut>
-              </div>
-            </header>
-            {children}
-          </Providers>
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-9E0060BH7S"
-            strategy="afterInteractive"
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-
-              gtag('config', 'G-9E0060BH7S');
-            `}
-          </Script>
-        </body>
-      </html>
-    </ClerkProvider>
+            gtag('config', 'G-9E0060BH7S');
+          `}
+        </Script>
+      </body>
+    </html>
   );
 }

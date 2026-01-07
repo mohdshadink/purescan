@@ -1,19 +1,9 @@
 // src/proxy.ts
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
-// Define public routes explicitly to prevent mobile redirects/blocking
-const isPublicRoute = createRouteMatcher([
-    '/',
-    '/api/(.*)',
-    '/sign-in(.*)',
-    '/sign-up(.*)'
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-    if (isPublicRoute(req)) {
-        return; // Skip protection for public routes
-    }
-});
+// No authentication - simple passthrough middleware
+export default function middleware() {
+    // No authentication protection
+    return;
+}
 
 export const config = {
     matcher: [
