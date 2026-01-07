@@ -119,10 +119,11 @@ export default function Home() {
       {/* Theme Toggle (Absolute Top Right) */}
 
 
+
       {/* Dynamic Background Blobs */}
-      <div className="fixed top-0 left-0 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-indigo-500/60 dark:bg-emerald-500/20 -z-50" />
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-fuchsia-500/60 dark:bg-purple-500/20 -z-50" />
-      <div className="fixed bottom-0 left-1/4 w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-indigo-500/60 dark:bg-emerald-500/20 -z-50" />
+      <div className="fixed -top-10 -left-10 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-indigo-500/60 dark:bg-emerald-500/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
+      <div className="fixed -top-10 -right-10 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-fuchsia-500/60 dark:bg-purple-500/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
+      <div className="fixed -bottom-10 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-indigo-500/60 dark:bg-emerald-500/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
       <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none -z-50" />
 
       {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
