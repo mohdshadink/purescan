@@ -285,7 +285,9 @@ export default function Home() {
 
                   {/* Findings List */}
                   {result.findings && result.findings.length > 0 && (
-                    <div className="bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5 rounded-2xl p-6 mb-6">
+                    <div className="bg-gray-50 border border-transparent dark:bg-white/5 dark:border-white/5 rounded-2xl p-6 mb-6"
+                      style={{ border: !isDarkMode ? '1px solid #94a3b8' : undefined }}
+                    >
                       <h4 className="text-sm font-bold uppercase tracking-widest text-[var(--foreground)] opacity-60 mb-4">Findings</h4>
                       <ul className="space-y-3">
                         {result.findings.map((finding, index) => (
@@ -299,7 +301,7 @@ export default function Home() {
                   )}
 
                   {/* Recommendation */}
-                  <div className="bg-emerald-50 border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20 rounded-2xl p-6 mb-8">
+                  <div className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 rounded-2xl p-6 mb-8">
                     <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-400 mb-2">Recommendation</h4>
                     <p className="text-[var(--foreground)] text-lg font-medium">
                       {result.recommendation}
