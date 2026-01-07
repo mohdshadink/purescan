@@ -166,11 +166,6 @@ export default function Home() {
               >
                 <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-3xl overflow-hidden border-2 border-[var(--card-border)] shadow-2xl bg-black/50">
                   <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  {isLoading && (
-                    <div className="absolute inset-0 bg-green-500/10 z-20">
-                      <div className="w-full h-0.5 bg-[var(--color-primary)] shadow-[0_0_20px_var(--color-primary)] absolute top-0 animate-[scan_2s_italic_infinite]" />
-                    </div>
-                  )}
                 </div>
                 {/* Reflection/Glow underneath */}
                 <div className="absolute -inset-4 bg-gradient-to-t from-[var(--color-primary)]/20 to-transparent blur-xl -z-10 rounded-full opacity-60" />

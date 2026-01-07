@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Camera, RefreshCw, Zap } from "lucide-react";
+import { X, Camera, RefreshCw } from "lucide-react";
 
 interface CameraModalProps {
     isOpen: boolean;
@@ -121,10 +121,7 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                         className="relative w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
                     >
                         {/* Header */}
-                        <div className="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
-                            <span className="flex items-center gap-2 text-white/80 text-sm font-bold uppercase tracking-widest">
-                                <Zap size={14} className="text-blue-500 fill-current" /> Live Feed
-                            </span>
+                        <div className="absolute top-0 inset-x-0 p-4 flex justify-end items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
                             <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                                 <X className="h-5 w-5 text-white" />
                             </button>
@@ -140,36 +137,6 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                                     muted
                                     className="w-full h-full object-cover rounded-2xl"
                                 />
-                            )}
-
-                            {/* Scanner Overlays */}
-                            {!permissionError && stream && (
-                                <>
-                                    {/* Laser Line Animation */}
-                                    <motion.div
-                                        initial={{ top: "0%" }}
-                                        animate={{ top: "100%" }}
-                                        transition={{
-                                            repeat: Infinity,
-                                            duration: 2,
-                                            ease: "linear",
-                                            repeatType: "reverse"
-                                        }}
-                                        className="absolute left-0 right-0 h-0.5 bg-green-500/80 shadow-[0_0_15px_rgba(34,197,94,0.8)] z-10"
-                                    />
-
-                                    {/* Telemetry Data */}
-                                    <div className="absolute top-4 left-4 z-20 font-mono text-xs text-green-500/80 tracking-widest">
-                                        SENSING...
-                                    </div>
-                                    <div className="absolute bottom-4 right-4 z-20 font-mono text-xs text-green-500/80 tracking-widest">
-                                        BIO_SIGNAL: STABLE
-                                    </div>
-
-                                    {/* Corner Brackets */}
-                                    <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-white/20 rounded-tr-lg" />
-                                    <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-white/20 rounded-bl-lg" />
-                                </>
                             )}
 
                             {permissionError && (
