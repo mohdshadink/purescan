@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Moon, Sun, Camera } from "lucide-react";
+import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Camera, ArrowRight, Info } from "lucide-react";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -120,9 +120,9 @@ export default function Home() {
 
 
       {/* Dynamic Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-      <div className="absolute top-0 -right-4 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/40 dark:bg-emerald-900/40" />
+      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/40 dark:bg-indigo-900/40" />
+      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/40 dark:bg-purple-900/40" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
 
       {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
@@ -257,76 +257,51 @@ export default function Home() {
                   key="result"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`
-                    w-full bg-white/5 backdrop-blur-xl rounded-3xl p-8 border 
-                    ${result.score >= 70 ? 'border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.1)]' :
-                      result.score < 40 ? 'border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.1)]' :
-                        'border-white/10'}
-                  `}
+                  className="w-full rounded-3xl p-8 bg-white/80 backdrop-blur-md shadow-xl border border-gray-200 dark:bg-gray-800/80 dark:border-gray-700 dark:shadow-none"
                 >
-                  {/* Background Gradient for result card */}
-                  <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${result.score >= 70 ? 'from-green-500/20' : result.score >= 30 ? 'from-yellow-500/20' : 'from-red-500/20'} to-transparent blur-3xl -z-10`} />
+                  {/* Title Header */}
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-[var(--foreground)] mb-4">
+                    {result.title}
+                  </h2>
 
-                  {/* Result Header */}
-                  <div className="flex justify-between items-start mb-10">
-                    <div>
-                      <h2 className={`text-4xl md:text-5xl font-black flex items-center gap-4 ${result.score >= 70 ? 'text-green-500' : result.score >= 30 ? 'text-yellow-500' : 'text-red-500'}`}>
-                        {result.score >= 70 && <CheckCircle className="h-10 w-10" />}
-                        {result.score >= 30 && result.score < 70 && <AlertTriangle className="h-10 w-10" />}
-                        {result.score < 30 && <XCircle className="h-10 w-10" />}
-                        {result.status}
-                      </h2>
-                      <p className="text-[var(--foreground)] opacity-60 text-sm mt-2 font-medium tracking-wide">Analysis Complete</p>
-                    </div>
-                    <div className="text-right bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-                      <span className="block text-4xl font-mono font-bold text-[var(--foreground)]">{result.score}</span>
-                      <span className="text-[10px] text-[var(--foreground)] opacity-50 uppercase tracking-widest">Quality Score</span>
-                    </div>
+                  {/* Health Score */}
+                  <p className="text-lg font-mono text-[var(--foreground)] opacity-80 mb-6">
+                    HEALTH SCORE: <span className="font-bold text-2xl">{result.score}</span>/10
+                  </p>
+
+                  {/* Status Banner */}
+                  <div className={`w-full py-4 px-6 rounded-xl mb-8 text-center font-bold text-xl uppercase tracking-widest text-white
+                    ${result.status === 'Safe' ? 'bg-green-500' :
+                      result.status === 'Moderate' ? 'bg-yellow-500 text-gray-900' :
+                        result.status === 'Non-Food' ? 'bg-blue-500' : 'bg-red-500'}`}
+                  >
+                    {result.status === 'Safe' && <CheckCircle className="inline h-6 w-6 mr-2 -mt-1" />}
+                    {result.status === 'Moderate' && <AlertTriangle className="inline h-6 w-6 mr-2 -mt-1" />}
+                    {result.status === 'Hazardous' && <XCircle className="inline h-6 w-6 mr-2 -mt-1" />}
+                    {result.status === 'Non-Food' && <Info className="inline h-6 w-6 mr-2 -mt-1" />}
+                    {result.status}
                   </div>
 
-                  {/* Range Bar */}
-                  <div className="mb-10">
-                    <div className="h-6 w-full bg-black/10 rounded-full overflow-hidden border border-[var(--card-border)] p-1.5 backdrop-blur-sm">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${result.score}%` }}
-                        transition={{ duration: 1.2, ease: "circOut" }}
-                        className={`h-full rounded-full shadow-[0_0_20px_currentColor] ${result.score >= 70 ? 'bg-green-500 text-green-500' : result.score >= 30 ? 'bg-yellow-500 text-yellow-500' : 'bg-red-500 text-red-500'}`}
-                      />
-                    </div>
-                    <div className="flex justify-between mt-3 text-[10px] uppercase text-[var(--foreground)] opacity-50 font-bold tracking-widest px-2">
-                      <span className="text-red-500">Hazardous</span>
-                      <span className="text-yellow-500">Moderate</span>
-                      <span className="text-green-500">Premium</span>
-                    </div>
-                  </div>
-
-                  {/* Granular Metrics Radar (Viz) */}
-                  {result.metrics && (
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                      {Object.entries(result.metrics).map(([key, value]) => (
-                        <div key={key} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col gap-2">
-                          <span className="text-[10px] uppercase tracking-widest opacity-60 font-bold">{key}</span>
-                          <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${value}%` }}
-                              className={`h-full rounded-full ${key === 'toxicity' ? 'bg-red-500' :
-                                key === 'processing' ? 'bg-yellow-500' :
-                                  key === 'nutrition' ? 'bg-green-500' : 'bg-blue-500'
-                                }`}
-                            />
-                          </div>
-                          <span className="text-xs font-mono self-end">{value}%</span>
-                        </div>
-                      ))}
+                  {/* Findings List */}
+                  {result.findings && result.findings.length > 0 && (
+                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-6">
+                      <h4 className="text-sm font-bold uppercase tracking-widest text-[var(--foreground)] opacity-60 mb-4">Findings</h4>
+                      <ul className="space-y-3">
+                        {result.findings.map((finding, index) => (
+                          <li key={index} className="flex items-start gap-3 text-[var(--foreground)]">
+                            <ArrowRight className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-base">{finding}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
-                  {/* Details */}
-                  <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-8 hover:bg-white/10 transition-colors">
-                    <p className="text-[var(--foreground)] leading-relaxed text-base font-light">
-                      {result.details}
+                  {/* Recommendation */}
+                  <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-6 border border-emerald-500/20 mb-8">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-400 mb-2">Recommendation</h4>
+                    <p className="text-[var(--foreground)] text-lg font-medium">
+                      {result.recommendation}
                     </p>
                   </div>
 

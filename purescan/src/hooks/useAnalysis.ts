@@ -11,17 +11,13 @@ if (!API_KEY) {
 }
 
 export interface AnalysisResult {
-    score: number;
-    status: 'Safe' | 'Moderate' | 'Hazardous';
-    details: string;
-    // Granular Metrics for Radar Chart
-    metrics: {
-        toxicity: number; // 0-100 (High is bad)
-        processing: number; // 0-100 (High is processed)
-        nutrition: number; // 0-100 (High is nutritious)
-        freshness: number; // 0-100 (High is fresh)
-    };
-};
+    title: string;
+    score: number; // 0-10 scale
+    status: 'Safe' | 'Moderate' | 'Hazardous' | 'Non-Food';
+    findings: string[];
+    recommendation: string;
+}
+
 export function useAnalysis() {
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -44,9 +40,8 @@ export function useAnalysis() {
             }
 
             const genAI = new GoogleGenerativeAI(API_KEY);
-            // Deterministic Generation Config (Greedy Decoding)
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 generationConfig: {
                     temperature: 0.1,
                     topK: 1,
@@ -68,41 +63,23 @@ export function useAnalysis() {
                 },
             };
 
-            const prompt = `
-        Analyze this image of food/ingredient. 
-        You are a Deterministic Nutritional Algo.
-        
-        Strictly output valid JSON only. No markdown formatting. No extra text.
-        
-        SCORING ALGORITHM (Start at 100):
-        - High Sugar (Visible icing/syrup/candy): DEDUCT 30 points.
-        - Ultra-Processed (Package/Artificial colors/Fast Food wrapper): DEDUCT 20 points.
-        - Fried/Greasy (Visible oil/deep fried): DEDUCT 15 points.
-        - Unknown Additives ( sauces/mixed sludge): DEDUCT 10 points.
-        - BONUSES: Add +5 points ONLY if visible whole fruit/nuts/leaves are the MAIN component.
-        
-        *Ensure the final score reflects these deductions.*
-        
-        Structure:
-        {
-          "score": number (Calculated score based on rubric),
-          "status": string ("Safe" > 70, "Moderate" 40-70, "Hazardous" < 40),
-          "details": string (List the deductions made. E.g., "Started at 100. -15 for grease. -20 for processing. Final: 65."),
-          "metrics": {
-              "toxicity": number (0-100, perceived toxicity/harmful additives),
-              "processing": number (0-100, level of industrial processing),
-              "nutrition": number (0-100, nutrient density estimate),
-              "freshness": number (0-100, visual freshness estimate)
-          }
-        }
-        
-        If the image is NOT food, return:
-        {
-          "score": 0,
-          "status": "Hazardous",
-          "details": "No food detected.",
-          "metrics": { "toxicity": 100, "processing": 100, "nutrition": 0, "freshness": 0 }
-        }`;
+            const prompt = `You are an expert food quality analyzer. Analyze the image and output strictly structured JSON ONLY. Do not use markdown formatting or code blocks.
+
+Required JSON structure:
+{
+  "title": "Short Item Name (e.g. 'Pepperoni Pizza' or 'Engagement Invitation')",
+  "score": Integer 0-10,
+  "status": "Safe / Moderate / Hazardous / Non-Food",
+  "findings": ["Short observation 1", "Short observation 2", "Short observation 3"],
+  "recommendation": "One short, helpful sentence."
+}
+
+Scoring Guide:
+- 8-10: Safe (Fresh, nutritious, minimal processing)
+- 5-7: Moderate (Some processing or concerns)
+- 1-4: Hazardous (Heavily processed, unhealthy, or spoiled)
+
+IMPORTANT: If the image is NOT food, set "score" to 0 and "status" to "Non-Food". Still identify what the item is in the title.`;
 
             const result = await model.generateContent([prompt, imagePart]);
             const response = await result.response;
@@ -111,20 +88,29 @@ export function useAnalysis() {
             const cleanJson = text.replace(/```json|```/g, "").trim();
             const data = JSON.parse(cleanJson);
 
-            setResult({
-                score: typeof data.score === 'number' ? data.score : 0,
-                status: data.status || "Unknown",
-                details: data.details || "Analysis complete.",
-                metrics: data.metrics || { toxicity: 0, processing: 0, nutrition: 0, freshness: 0 }
-            });
+            // Ensure score is within 0-10 range
+            const score = Math.max(0, Math.min(10, typeof data.score === 'number' ? data.score : 0));
 
+            // Determine status based on score if not provided
+            let status: AnalysisResult['status'] = data.status;
+            if (!['Safe', 'Moderate', 'Hazardous', 'Non-Food'].includes(status)) {
+                status = score === 0 ? 'Non-Food' : score >= 8 ? 'Safe' : score >= 5 ? 'Moderate' : 'Hazardous';
+            }
+
+            setResult({
+                title: data.title || "Unknown Item",
+                score: score,
+                status: status,
+                findings: Array.isArray(data.findings) ? data.findings : [],
+                recommendation: data.recommendation || "Analysis complete."
+            });
 
             // Save to database (Fire and forget - don't block UI)
             console.log("Saving scan result...");
             saveScan({
-                foodName: "Scanned Item",
-                score: typeof data.score === 'number' ? data.score : 0,
-                analysis: data.details || "Analysis complete.",
+                foodName: data.title || "Scanned Item",
+                score: score,
+                analysis: data.recommendation || "Analysis complete.",
                 imageUrl: base64Data
             }).then(res => console.log("Save complete:", res))
                 .catch(e => console.error("Background save failed:", e));

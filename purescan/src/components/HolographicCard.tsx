@@ -44,10 +44,11 @@ export default function HolographicCard({ children, className = "", isActive, ..
             {...props}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className={`relative transition-all duration-200 ease-out transform-gpu ${className} ${isActive ? 'scale-95' : ''}`}
+            className={`relative transition-all duration-200 ease-out transform-gpu ${className} ${isActive ? 'scale-[0.98] ring-2 ring-emerald-500 ring-offset-2 ring-offset-transparent' : ''}`}
             style={{
                 transform,
                 transformStyle: "preserve-3d",
+                boxShadow: isActive ? '0 0 30px rgba(16, 185, 129, 0.4)' : undefined,
             }}
         >
             {/* Content Layer */}
