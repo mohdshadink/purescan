@@ -53,7 +53,13 @@ export function useAnalysis() {
             const objectUrl = URL.createObjectURL(file);
             const image = new Image();
             image.src = objectUrl;
-            await image.decode(); // Wait for image to fully load (better AVIF support)
+
+            try {
+                await image.decode();
+            } catch (e) {
+                console.error("Image decode failed", e);
+                throw new Error("Failed to process image. Please try a different format.");
+            }
 
             const canvas = document.createElement('canvas');
             canvas.width = image.width;

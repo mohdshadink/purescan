@@ -120,9 +120,9 @@ export default function Home() {
 
 
       {/* Dynamic Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/60 dark:bg-emerald-900/40" />
-      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/60 dark:bg-indigo-900/40" />
-      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/60 dark:bg-purple-900/40" />
+      <div className="absolute top-0 -left-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-purple-600/50 dark:bg-emerald-900/40" />
+      <div className="absolute top-0 -right-4 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-blue-600/50 dark:bg-indigo-900/40" />
+      <div className="absolute -bottom-8 left-20 w-72 h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-pink-600/50 dark:bg-purple-900/40" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
 
       {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
@@ -257,7 +257,8 @@ export default function Home() {
                   key="result"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full rounded-3xl p-8 bg-white shadow-2xl ring-1 ring-gray-900/10 dark:bg-gray-900/50 dark:border dark:border-gray-800 dark:shadow-none dark:ring-0 text-gray-900 dark:text-white"
+                  className="w-full rounded-3xl p-8 bg-white shadow-xl dark:bg-gray-900/50 dark:border dark:border-gray-800 dark:shadow-none text-gray-900 dark:text-white"
+                  style={{ backgroundColor: !isDarkMode ? '#ffffff' : undefined }}
                 >
                   {/* Title Header */}
                   <h2 className="text-3xl md:text-4xl font-extrabold text-[var(--foreground)] mb-4">
@@ -284,7 +285,7 @@ export default function Home() {
 
                   {/* Findings List */}
                   {result.findings && result.findings.length > 0 && (
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-6">
+                    <div className="bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5 rounded-2xl p-6 mb-6">
                       <h4 className="text-sm font-bold uppercase tracking-widest text-[var(--foreground)] opacity-60 mb-4">Findings</h4>
                       <ul className="space-y-3">
                         {result.findings.map((finding, index) => (
@@ -298,7 +299,7 @@ export default function Home() {
                   )}
 
                   {/* Recommendation */}
-                  <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-6 border border-emerald-500/20 mb-8">
+                  <div className="bg-emerald-50 border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20 rounded-2xl p-6 mb-8">
                     <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-400 mb-2">Recommendation</h4>
                     <p className="text-[var(--foreground)] text-lg font-medium">
                       {result.recommendation}
@@ -307,7 +308,11 @@ export default function Home() {
 
                   <button
                     onClick={resetScan}
-                    className="w-full py-5 rounded-2xl bg-white/10 hover:bg-white/20 text-[var(--foreground)] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-white/5 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full py-5 rounded-2xl bg-gray-900 hover:bg-black text-white dark:bg-white/10 dark:hover:bg-white/20 dark:text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-transparent dark:border-white/5 hover:scale-[1.02] active:scale-[0.98] shadow-lg dark:shadow-none"
+                    style={{
+                      backgroundColor: !isDarkMode ? '#111827' : undefined,
+                      color: !isDarkMode ? '#ffffff' : undefined
+                    }}
                   >
                     <RefreshCw className="h-5 w-5" /> New Analysis
                   </button>
