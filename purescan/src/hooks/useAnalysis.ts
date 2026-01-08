@@ -84,17 +84,23 @@ export function useAnalysis() {
 
 Required JSON structure:
 {
-  "title": "Short Item Name (e.g. 'Pepperoni Pizza' or 'Engagement Invitation')",
+  "title": "Short Item Name (e.g. 'Pepperoni Pizza' or 'Caesar Salad')",
   "score": Integer 0-10,
   "status": "Safe / Moderate / Hazardous / Non-Food",
   "findings": ["Short observation 1", "Short observation 2", "Short observation 3"],
   "recommendation": "One short, helpful sentence."
 }
 
-Scoring Guide:
-- 8-10: Safe (Fresh, nutritious, minimal processing)
-- 5-7: Moderate (Some processing or concerns)
-- 1-4: Hazardous (Heavily processed, unhealthy, or spoiled)
+Scoring Guide - FOCUS ON FRESHNESS AND EDIBILITY:
+- Score the item primarily on FRESHNESS and EDIBILITY.
+- If the food looks fresh, vibrant, and ready to eat (e.g., a fresh salad, a hot pizza, a clean fruit), give it a High Score (9-10).
+- Only lower the score if the food looks: stale, rotten, moldy, burnt, or dangerously unhygienic.
+- Do NOT penalize processed ingredients (like cheese, bread, bacon, or croutons) if they look fresh and safe to eat.
+
+Examples:
+- Fresh Caesar Salad: 10/10 (fresh, vibrant, safe)
+- Fresh Burger: 9-10/10 (safe, fresh ingredients)
+- Moldy Orange: 1/10 (spoiled, unsafe)
 
 IMPORTANT: If the image is NOT food, set "score" to 0 and "status" to "Non-Food". Still identify what the item is in the title.`;
 
