@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Camera, ArrowRight, Info } from "lucide-react";
+import { UploadCloud, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Camera, Video, ArrowRight, Info } from "lucide-react";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import Footer from "@/components/Footer";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -21,6 +21,7 @@ export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isLiveMode, setIsLiveMode] = useState(false); // NEW: Track if live detection is enabled
   const { analyze, isLoading, error, result, clearError } = useAnalysis();
   const { speak } = useVoice();
   const { theme, setTheme } = useTheme();
@@ -178,54 +179,85 @@ export default function Home() {
             <AnimatePresence mode="wait">
               {/* UPLOAD STATE */}
               {!result && !isLoading && (
-                <div className="flex flex-col md:flex-row gap-6 md:gap-8 w-full">
-                  {/* CARD 1: File Upload */}
-                  <HolographicCard
-                    isActive={isDragActive}
-                    className={`
-                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
-                      ${isDarkMode
-                        ? 'bg-white/5 border border-white/10'
-                        : 'bg-white border border-gray-200 shadow-xl'
-                      }
-                    `}
-                  >
-                    {/* Inner content with dropzone */}
-                    <div {...getRootProps()} className="flex flex-col items-center w-full h-full justify-center">
-                      <input
-                        {...getInputProps()}
-                        onClick={(e) => {
-                          // Prevent double-firing on mobile
-                          e.stopPropagation();
-                        }}
-                      />
-                      <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
-                        <UploadCloud className="h-8 w-8" />
+                <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
+                  {/* TOP ROW: Two Base Options */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    {/* CARD 1: Standard Camera (Simple Photo) */}
+                    <HolographicCard
+                      onClick={() => {
+                        setIsLiveMode(false);
+                        setIsCameraOpen(true);
+                      }}
+                      className={`
+                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        ${isDarkMode
+                          ? 'bg-white/5 border border-white/10'
+                          : 'bg-white border border-gray-200 shadow-xl'
+                        }
+                      `}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
+                          <Camera className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
+                        <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
                       </div>
-                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
-                      <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
-                    </div>
-                  </HolographicCard>
+                    </HolographicCard>
 
-                  {/* CARD 2: Camera */}
-                  <HolographicCard
-                    onClick={() => setIsCameraOpen(true)}
-                    className={`
-                      flex-1 flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
-                      ${isDarkMode
-                        ? 'bg-white/5 border border-white/10'
-                        : 'bg-white border border-gray-200 shadow-xl'
-                      }
-                    `}
-                  >
-                    <div className="flex flex-col items-center">
-                      <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
-                        <Camera className="h-8 w-8" />
+                    {/* CARD 2: File Upload */}
+                    <HolographicCard
+                      isActive={isDragActive}
+                      className={`
+                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        ${isDarkMode
+                          ? 'bg-white/5 border border-white/10'
+                          : 'bg-white border border-gray-200 shadow-xl'
+                        }
+                      `}
+                    >
+                      {/* Inner content with dropzone */}
+                      <div {...getRootProps()} className="flex flex-col items-center w-full h-full justify-center">
+                        <input
+                          {...getInputProps()}
+                          onClick={(e) => {
+                            // Prevent double-firing on mobile
+                            e.stopPropagation();
+                          }}
+                        />
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
+                          <UploadCloud className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
+                        <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
                       </div>
-                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
-                      <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
-                    </div>
-                  </HolographicCard>
+                    </HolographicCard>
+                  </div>
+
+                  {/* BOTTOM ROW: Advanced Option (Centered) */}
+                  <div className="w-full md:w-1/2 flex justify-center">
+                    <HolographicCard
+                      onClick={() => {
+                        setIsLiveMode(true);
+                        setIsCameraOpen(true);
+                      }}
+                      className={`
+                        w-full flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        ${isDarkMode
+                          ? 'bg-white/5 border border-white/10'
+                          : 'bg-white border border-gray-200 shadow-xl'
+                        }
+                      `}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
+                          <Video className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Live Cam</h3>
+                        <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Detect while shopping</p>
+                      </div>
+                    </HolographicCard>
+                  </div>
                 </div>
               )}
 
@@ -325,6 +357,7 @@ export default function Home() {
             isOpen={isCameraOpen}
             onClose={() => setIsCameraOpen(false)}
             onCapture={handleCapturedImage}
+            enableLiveDetection={isLiveMode}
           />
 
         </div>

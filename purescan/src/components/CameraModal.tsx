@@ -10,6 +10,7 @@ interface CameraModalProps {
     isOpen: boolean;
     onClose: () => void;
     onCapture: (file: File) => void;
+    enableLiveDetection?: boolean; // NEW: Enable real-time object detection
 }
 
 // Type for COCO-SSD detection predictions
@@ -26,7 +27,7 @@ interface DetectedObject {
 // For complete freshness analysis, users should capture and send to Gemini API.
 const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant', 'bowl', 'cup'];
 
-export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalProps) {
+export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDetection = false }: CameraModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -179,9 +180,9 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
         }, 100);
     }, [model, stream]);
 
-    // Start detection loop when model and stream are ready
+    // Start detection loop when model and stream are ready (only if live detection is enabled)
     useEffect(() => {
-        if (model && stream && videoRef.current) {
+        if (enableLiveDetection && model && stream && videoRef.current) {
             runDetection();
         }
 
@@ -192,13 +193,14 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                 detectionFrameRef.current = null;
             }
         };
-    }, [model, stream, runDetection]);
+    }, [enableLiveDetection, model, stream, runDetection]);
 
     // Primary lifecycle effect
     useEffect(() => {
         if (isOpen) {
             startCamera();
-            if (!model) {
+            // Only load TensorFlow model if live detection is enabled
+            if (enableLiveDetection && !model) {
                 loadModel();
             }
         } else {
@@ -218,7 +220,7 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                 cancelAnimationFrame(detectionFrameRef.current);
             }
         };
-    }, [isOpen, startCamera, stopCamera, loadModel, model]);
+    }, [isOpen, enableLiveDetection, startCamera, stopCamera, loadModel, model]);
 
     // Video attachment effect
     useEffect(() => {
@@ -297,13 +299,15 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                                         muted
                                         className="w-full h-full object-cover rounded-2xl"
                                     />
-                                    {/* AR Overlay Canvas for Detection Boxes */}
-                                    <canvas
-                                        ref={overlayCanvasRef}
-                                        className="absolute inset-0 w-full h-full pointer-events-none"
-                                    />
-                                    {/* Model Loading Indicator */}
-                                    {isModelLoading && (
+                                    {/* AR Overlay Canvas for Detection Boxes - Only in Live Mode */}
+                                    {enableLiveDetection && (
+                                        <canvas
+                                            ref={overlayCanvasRef}
+                                            className="absolute inset-0 w-full h-full pointer-events-none"
+                                        />
+                                    )}
+                                    {/* Model Loading Indicator - Only in Live Mode */}
+                                    {enableLiveDetection && isModelLoading && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                                             <div className="text-white text-center">
                                                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
@@ -334,10 +338,12 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                                         <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
                                     </button>
 
-                                    {/* Explanatory Label */}
-                                    <p className="text-white/40 text-xs text-center font-medium">
-                                        Live Targeting: Detecting basic shapes...
-                                    </p>
+                                    {/* Explanatory Label - Only in Live Mode */}
+                                    {enableLiveDetection && (
+                                        <p className="text-white/40 text-xs text-center font-medium">
+                                            Live Targeting: Detecting basic shapes...
+                                        </p>
+                                    )}
                                 </>
                             ) : (
                                 <div className="flex flex-col items-center gap-3">
