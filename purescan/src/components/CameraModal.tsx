@@ -20,6 +20,10 @@ interface DetectedObject {
 }
 
 // Food items we want to detect (expanded to include containers)
+// NOTE: COCO-SSD model has a limited vocabulary of ~80 classes.
+// It supports: banana, apple, orange, broccoli, carrot, bowl, cup, potted plant
+// It does NOT support: watermelon, grapes, strawberry, etc.
+// For complete freshness analysis, users should capture and send to Gemini API.
 const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant', 'bowl', 'cup'];
 
 export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalProps) {
@@ -119,9 +123,10 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         try {
-            // Run detection with lower confidence threshold (0.3 = 30%) to reduce flickering
+            // Run detection with very low confidence threshold (0.20 = 20%) to maximize stability
+            // This prevents bounding boxes from flickering when confidence hovers around 50%
             // Parameters: detect(video, maxDetections, scoreThreshold)
-            const predictions = await model.detect(video, 10, 0.3);
+            const predictions = await model.detect(video, 20, 0.20);
 
             // Filter for food items and draw bounding boxes
             const foodDetections = predictions.filter((prediction: DetectedObject) =>
@@ -321,12 +326,19 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                         {/* Controls */}
                         <div className="p-6 bg-[#111] flex flex-col items-center gap-4">
                             {!permissionError ? (
-                                <button
-                                    onClick={handleCapture}
-                                    className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group"
-                                >
-                                    <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleCapture}
+                                        className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group"
+                                    >
+                                        <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
+                                    </button>
+
+                                    {/* Explanatory Label */}
+                                    <p className="text-white/40 text-xs text-center font-medium">
+                                        Live Targeting: Detecting basic shapes...
+                                    </p>
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center gap-3">
                                     <button onClick={startCamera} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors text-sm">
