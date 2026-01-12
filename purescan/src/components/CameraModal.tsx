@@ -19,8 +19,8 @@ interface DetectedObject {
     score: number;
 }
 
-// Food items we want to detect
-const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant'];
+// Food items we want to detect (expanded to include containers)
+const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant', 'bowl', 'cup'];
 
 export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -119,8 +119,9 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         try {
-            // Run detection
-            const predictions = await model.detect(video);
+            // Run detection with lower confidence threshold (0.3 = 30%) to reduce flickering
+            // Parameters: detect(video, maxDetections, scoreThreshold)
+            const predictions = await model.detect(video, 10, 0.3);
 
             // Filter for food items and draw bounding boxes
             const foodDetections = predictions.filter((prediction: DetectedObject) =>
