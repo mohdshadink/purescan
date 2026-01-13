@@ -1,19 +1,42 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, RefreshCw } from "lucide-react";
+import * as tf from "@tensorflow/tfjs";
+import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-backend-cpu";
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
 
 interface CameraModalProps {
     isOpen: boolean;
     onClose: () => void;
     onCapture: (file: File) => void;
+    enableLiveDetection?: boolean; // NEW: Enable real-time object detection
 }
 
-export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalProps) {
+// Type for COCO-SSD detection predictions
+interface DetectedObject {
+    bbox: [number, number, number, number];
+    class: string;
+    score: number;
+}
+
+// Food items we want to detect (expanded to include containers)
+// NOTE: COCO-SSD model has a limited vocabulary of ~80 classes.
+// It supports: banana, apple, orange, broccoli, carrot, bowl, cup, potted plant
+// It does NOT support: watermelon, grapes, strawberry, etc.
+// For complete freshness analysis, users should capture and send to Gemini API.
+const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant', 'bowl', 'cup'];
+
+export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDetection = false }: CameraModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
     const fallbackInputRef = useRef<HTMLInputElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [permissionError, setPermissionError] = useState<boolean>(false);
+    const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
+    const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
+    const detectionFrameRef = useRef<number | null>(null);
 
     // Use a ref to track the stream for cleanup to avoid dependency cycles
     const streamRef = useRef<MediaStream | null>(null);
@@ -46,20 +69,158 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
         }
     }, []); // Stable dependency
 
+    // Load COCO-SSD model
+    const loadModel = useCallback(async () => {
+        try {
+            setIsModelLoading(true);
+
+            // Initialize TensorFlow backend before loading model
+            try {
+                await tf.setBackend('webgl');
+                await tf.ready();
+                console.log('TensorFlow backend initialized: webgl');
+            } catch (backendErr) {
+                console.warn('WebGL backend failed, falling back to CPU:', backendErr);
+                try {
+                    await tf.setBackend('cpu');
+                    await tf.ready();
+                    console.log('TensorFlow backend initialized: cpu');
+                } catch (cpuErr) {
+                    console.error('Failed to initialize any TensorFlow backend:', cpuErr);
+                    throw new Error('Could not initialize TensorFlow backend');
+                }
+            }
+
+            // Use lite model for better mobile performance
+            const loadedModel = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+            setModel(loadedModel);
+            setIsModelLoading(false);
+        } catch (err) {
+            console.error("Failed to load COCO-SSD model:", err);
+            setIsModelLoading(false);
+        }
+    }, []);
+
+    // Detection loop
+    const runDetection = useCallback(async () => {
+        if (!model || !videoRef.current || !overlayCanvasRef.current || !stream) {
+            return;
+        }
+
+        const video = videoRef.current;
+        const canvas = overlayCanvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx || video.readyState !== 4) {
+            detectionFrameRef.current = requestAnimationFrame(runDetection);
+            return;
+        }
+
+        // Match canvas size to video display size
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Clear previous drawings
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        try {
+            // Run detection with very low confidence threshold (0.20 = 20%) to maximize stability
+            // This prevents bounding boxes from flickering when confidence hovers around 50%
+            // Parameters: detect(video, maxDetections, scoreThreshold)
+            const predictions = await model.detect(video, 20, 0.20);
+
+            // Filter for food items and draw bounding boxes
+            const foodDetections = predictions.filter((prediction: DetectedObject) =>
+                FOOD_ITEMS.includes(prediction.class.toLowerCase())
+            );
+
+            foodDetections.forEach((prediction: DetectedObject, index: number) => {
+                const [x, y, width, height] = prediction.bbox;
+                const confidence = Math.round(prediction.score * 100);
+
+                // Color palette for different items
+                const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
+                const color = colors[index % colors.length];
+
+                // Draw bounding box
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, width, height);
+
+                // Draw label background
+                const label = `${prediction.class} (${confidence}%)`;
+                ctx.font = 'bold 16px Arial';
+                const textMetrics = ctx.measureText(label);
+                const textHeight = 20;
+                const padding = 8;
+
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y - textHeight - padding, textMetrics.width + padding * 2, textHeight + padding);
+
+                // Draw label text
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(label, x + padding, y - padding);
+            });
+
+            // Show "Searching..." if no food detected
+            if (foodDetections.length === 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = 'bold 20px Arial';
+                const searchText = 'Searching for food...';
+                const textWidth = ctx.measureText(searchText).width;
+                ctx.fillText(searchText, (canvas.width - textWidth) / 2, 40);
+            }
+        } catch (err) {
+            console.error("Detection error:", err);
+        }
+
+        // Continue loop - run detection every ~100ms
+        setTimeout(() => {
+            detectionFrameRef.current = requestAnimationFrame(runDetection);
+        }, 100);
+    }, [model, stream]);
+
+    // Start detection loop when model and stream are ready (only if live detection is enabled)
+    useEffect(() => {
+        if (enableLiveDetection && model && stream && videoRef.current) {
+            runDetection();
+        }
+
+        return () => {
+            // Cleanup detection loop
+            if (detectionFrameRef.current) {
+                cancelAnimationFrame(detectionFrameRef.current);
+                detectionFrameRef.current = null;
+            }
+        };
+    }, [enableLiveDetection, model, stream, runDetection]);
+
     // Primary lifecycle effect
     useEffect(() => {
         if (isOpen) {
             startCamera();
+            // Only load TensorFlow model if live detection is enabled
+            if (enableLiveDetection && !model) {
+                loadModel();
+            }
         } else {
             stopCamera();
+            // Stop detection loop
+            if (detectionFrameRef.current) {
+                cancelAnimationFrame(detectionFrameRef.current);
+                detectionFrameRef.current = null;
+            }
         }
         return () => {
             // Cleanup on unmount
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop());
             }
+            if (detectionFrameRef.current) {
+                cancelAnimationFrame(detectionFrameRef.current);
+            }
         };
-    }, [isOpen, startCamera, stopCamera]);
+    }, [isOpen, enableLiveDetection, startCamera, stopCamera, loadModel, model]);
 
     // Video attachment effect
     useEffect(() => {
@@ -130,13 +291,31 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                         {/* Video Feed */}
                         <div className="relative aspect-[3/4] md:aspect-square bg-black flex items-center justify-center rounded-2xl overflow-hidden">
                             {!permissionError && stream && (
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    playsInline
-                                    muted
-                                    className="w-full h-full object-cover rounded-2xl"
-                                />
+                                <>
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        muted
+                                        className="w-full h-full object-cover rounded-2xl"
+                                    />
+                                    {/* AR Overlay Canvas for Detection Boxes - Only in Live Mode */}
+                                    {enableLiveDetection && (
+                                        <canvas
+                                            ref={overlayCanvasRef}
+                                            className="absolute inset-0 w-full h-full pointer-events-none"
+                                        />
+                                    )}
+                                    {/* Model Loading Indicator - Only in Live Mode */}
+                                    {enableLiveDetection && isModelLoading && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                            <div className="text-white text-center">
+                                                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+                                                <p className="text-sm">Loading AI Model...</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
 
                             {permissionError && (
@@ -151,12 +330,21 @@ export default function CameraModal({ isOpen, onClose, onCapture }: CameraModalP
                         {/* Controls */}
                         <div className="p-6 bg-[#111] flex flex-col items-center gap-4">
                             {!permissionError ? (
-                                <button
-                                    onClick={handleCapture}
-                                    className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group"
-                                >
-                                    <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleCapture}
+                                        className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group"
+                                    >
+                                        <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
+                                    </button>
+
+                                    {/* Explanatory Label - Only in Live Mode */}
+                                    {enableLiveDetection && (
+                                        <p className="text-white/40 text-xs text-center font-medium">
+                                            Live Targeting: Detecting basic shapes...
+                                        </p>
+                                    )}
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center gap-3">
                                     <button onClick={startCamera} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors text-sm">

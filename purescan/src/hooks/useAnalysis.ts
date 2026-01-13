@@ -97,10 +97,25 @@ Scoring Guide - FOCUS ON FRESHNESS AND EDIBILITY:
 - Only lower the score if the food looks: stale, rotten, moldy, burnt, or dangerously unhygienic.
 - Do NOT penalize processed ingredients (like cheese, bread, bacon, or croutons) if they look fresh and safe to eat.
 
+SCENARIO: GROUP OF ITEMS (e.g., Fruit Bowl, Pile of Veggies, Multiple Foods)
+CRITICAL - If multiple items are visible:
+1. SCAN ALL ITEMS INDIVIDUALLY - Examine each item in the group separately
+2. SCORING STRATEGY:
+   - Base the overall "Health Score" on the SAFEST / FRESHEST MAJORITY
+   - If 90% of items are fresh but one apple has a bruise, give 8-9/10 (not 10/10)
+   - If half the items are spoiled, give 4-6/10
+3. FINDINGS FORMAT - Be specific about each item:
+   - Use checkmarks and warnings: "✅ Majority of items are fresh and safe"
+   - Flag problems: "⚠️ Warning: The red apple on the left appears bruised"
+   - Be specific: "✅ Bananas are perfectly ripe" or "⚠️ The strawberries show signs of mold"
+4. TITLE - For groups, use descriptive titles: "Mixed Fruit Bowl" or "Vegetable Assortment"
+
 Examples:
 - Fresh Caesar Salad: 10/10 (fresh, vibrant, safe)
 - Fresh Burger: 9-10/10 (safe, fresh ingredients)
 - Moldy Orange: 1/10 (spoiled, unsafe)
+- Fruit Bowl (mostly fresh, one bruised apple): 8-9/10
+  Findings: ["✅ Most fruits are fresh and ripe", "⚠️ One apple shows bruising on the left side", "✅ Bananas are at perfect ripeness"]
 
 IMPORTANT: If the image is NOT food, set "score" to 0 and "status" to "Non-Food". Still identify what the item is in the title.`;
 
