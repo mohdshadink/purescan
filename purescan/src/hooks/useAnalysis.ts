@@ -91,6 +91,18 @@ Required JSON structure:
   "recommendation": "One short, helpful sentence."
 }
 
+========================================
+MODE DETECTION - ANALYZE THIS FIRST:
+========================================
+FIRST, determine the image type:
+- Is it physical food (MODE A) - actual fruits, vegetables, meals, etc.?
+- OR is it a text label/packaging (MODE B) - ingredient lists, nutrition facts, product labels?
+
+========================================
+[MODE A: VISUAL FOOD ANALYSIS]
+========================================
+Applies to: Physical food items (fruit, vegetables, meals, etc.)
+
 Scoring Guide - FOCUS ON FRESHNESS AND EDIBILITY:
 - Score the item primarily on FRESHNESS and EDIBILITY.
 - If the food looks fresh, vibrant, and ready to eat (e.g., a fresh salad, a hot pizza, a clean fruit), give it a High Score (9-10).
@@ -117,7 +129,40 @@ Examples:
 - Fruit Bowl (mostly fresh, one bruised apple): 8-9/10
   Findings: ["✅ Most fruits are fresh and ripe", "⚠️ One apple shows bruising on the left side", "✅ Bananas are at perfect ripeness"]
 
-IMPORTANT: If the image is NOT food, set "score" to 0 and "status" to "Non-Food". Still identify what the item is in the title.`;
+========================================
+[MODE B: INGREDIENT LABEL ANALYSIS]
+========================================
+Applies to: Photos of text on packaging, ingredient lists, nutrition labels
+
+CRITICAL: IGNORE visual freshness (it's just paper/plastic).
+
+TASK: Read the ingredients and assess their quality.
+
+CRITICAL FOCUS - You must actively look for and report on:
+- Preservatives (e.g., Sodium Benzoate, Potassium Sorbate, Nitrates, BHA, BHT, TBHQ)
+- Acids / Acidity Regulators (e.g., Phosphoric Acid, Citric Acid, Malic Acid, Lactic Acid)
+- Artificial Additives (colors like Red 40, Yellow 5; emulsifiers like Polysorbate 80; sweeteners like Aspartame, Sucralose, Saccharin)
+
+SCORING FOR LABELS - Score based on the 'cleanliness' of the ingredients:
+- 10/10 = All recognizable natural foods (e.g., "Almonds, Sea Salt")
+- 7-9/10 = Mostly natural with minimal preservatives (e.g., "Tomatoes, Water, Citric Acid")
+- 4-6/10 = Several additives/preservatives (e.g., "High Fructose Corn Syrup, Sodium Benzoate, Artificial Colors")
+- 1-3/10 = Mostly industrial chemicals/ultra-processed (e.g., "Multiple preservatives, acids, artificial sweeteners")
+
+OUTPUT FORMAT FOR LABELS:
+- 'title': Name of the product (e.g., "Soda Ingredient Label" or "Snack Bar Nutrition Info")
+- 'findings': List specific chemical ingredients found and their health implications. Examples:
+  * "⚠️ Phosphoric Acid found: Common in sodas, excessive intake linked to bone density issues."
+  * "⚠️ Sodium Benzoate: A preservative that may form benzene (carcinogen) when combined with Vitamin C."
+  * "ℹ️ Citric Acid: A common preservative derived from fruit, generally safe in moderation."
+  * "⚠️ Artificial Color Red 40: Synthetic dye linked to hyperactivity in sensitive children."
+  * "⚠️ High Fructose Corn Syrup: Ultra-processed sweetener associated with metabolic issues."
+- 'recommendation': Summarize the overall processed nature (e.g., "Ultra-processed snack with multiple preservatives and artificial acids - consume sparingly." or "Clean ingredient list with only natural preservatives.")
+
+========================================
+GENERAL RULES (Both Modes):
+========================================
+IMPORTANT: If the image is NOT food-related at all, set "score" to 0 and "status" to "Non-Food". Still identify what the item is in the title.`;
 
             const result = await model.generateContent([prompt, imagePart]);
             const response = await result.response;
