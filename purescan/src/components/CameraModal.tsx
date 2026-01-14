@@ -42,15 +42,15 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     const [permissionError, setPermissionError] = useState<boolean>(false);
     const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
     const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
-    const [isCapturing, setIsCapturing] = useState<boolean>(false); // State for capture UI feedback
-    const [isAIWarmingUp, setIsAIWarmingUp] = useState<boolean>(false); // NEW: Reliable loading state for UI
+    const [isCapturing, setIsCapturing] = useState<boolean>(false);
+    const [isAIInitializing, setIsAIInitializing] = useState<boolean>(false); // FORCED loading screen state
     const detectionFrameRef = useRef<number | null>(null);
 
     // Use a ref to track the stream for cleanup to avoid dependency cycles
     const streamRef = useRef<MediaStream | null>(null);
 
-    // NEW: Ref to store last VALID predictions for 2-second persistence (anti-flicker)
-    const lastValidPredictions = useRef<{ data: DetectedObject[], timestamp: number }>({ data: [], timestamp: 0 });
+    // Ref to store last VALID predictions for 2-second persistence (anti-flicker)
+    const lastValidPredictionsRef = useRef<{ data: DetectedObject[], timestamp: number }>({ data: [], timestamp: 0 });
 
     const startCamera = useCallback(async () => {
         try {
@@ -80,11 +80,11 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
         }
     }, []); // Stable dependency
 
-    // Load COCO-SSD model
+    // Load COCO-SSD model with forced minimum loading time for UX
     const loadModel = useCallback(async () => {
         try {
             setIsModelLoading(true);
-            setIsAIWarmingUp(true); // Signal UI to show loading screen
+            const loadStartTime = Date.now();
 
             // Initialize TensorFlow backend before loading model
             try {
@@ -108,12 +108,17 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
             setModel(loadedModel);
             setIsModelLoading(false);
 
-            // CRITICAL: Only hide loading screen AFTER model is fully ready
-            setIsAIWarmingUp(false);
+            // FORCE minimum 1500ms loading screen for visual feedback
+            const loadTime = Date.now() - loadStartTime;
+            const remainingTime = Math.max(0, 1500 - loadTime);
+
+            setTimeout(() => {
+                setIsAIInitializing(false);
+            }, remainingTime);
         } catch (err) {
             console.error("Failed to load COCO-SSD model:", err);
             setIsModelLoading(false);
-            setIsAIWarmingUp(false);
+            setIsAIInitializing(false);
         }
     }, []);
 
@@ -154,18 +159,18 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
 
             if (foodDetections.length > 0) {
                 // NEW detections found - update ref with current data and timestamp
-                lastValidPredictions.current = {
+                lastValidPredictionsRef.current = {
                     data: foodDetections,
                     timestamp: Date.now()
                 };
                 detectionsToRender = foodDetections;
             } else {
                 // NO detections - check if we should persist old ones (GHOST MODE)
-                const timeSinceLast = Date.now() - lastValidPredictions.current.timestamp;
+                const timeSinceLast = Date.now() - lastValidPredictionsRef.current.timestamp;
 
                 if (timeSinceLast < 2000) {
                     // Less than 2 seconds - DRAW STORED PREDICTIONS (prevents flicker)
-                    detectionsToRender = lastValidPredictions.current.data;
+                    detectionsToRender = lastValidPredictionsRef.current.data;
                 } else {
                     // More than 2 seconds - clear boxes
                     detectionsToRender = [];
@@ -256,9 +261,9 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
 
             // Set warming up state immediately when opening in live mode
             if (enableLiveDetection) {
-                setIsAIWarmingUp(true);
+                setIsAIInitializing(true);
             } else {
-                setIsAIWarmingUp(false);
+                setIsAIInitializing(false);
             }
 
             // Only load TensorFlow model if live detection is enabled
@@ -266,11 +271,11 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 loadModel();
             } else if (enableLiveDetection && model) {
                 // Model already cached - hide loading immediately
-                setIsAIWarmingUp(false);
+                setIsAIInitializing(false);
             }
         } else {
             stopCamera();
-            setIsAIWarmingUp(false);
+            setIsAIInitializing(false);
             // Stop detection loop
             if (detectionFrameRef.current) {
                 cancelAnimationFrame(detectionFrameRef.current);
@@ -397,9 +402,9 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                         />
                                     )}
 
-                                    {/* AI Warming Up Overlay - HIGHEST PRIORITY (z-30) */}
-                                    {isAIWarmingUp && enableLiveDetection && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black z-30">
+                                    {/* AI Initializing Overlay - HIGHEST PRIORITY (z-50) */}
+                                    {isAIInitializing && enableLiveDetection && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
                                             <div className="text-white text-center">
                                                 <RefreshCw className="h-16 w-16 animate-spin mx-auto mb-4 text-green-400" />
                                                 <p className="text-xl font-bold mb-2">Initializing Smart Vision</p>
@@ -409,7 +414,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                     )}
 
                                     {/* Manual Targeting Scope (Permanent) - Only in Live Mode */}
-                                    {enableLiveDetection && !isAIWarmingUp && (
+                                    {enableLiveDetection && !isAIInitializing && (
                                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                             <div className="relative">
                                                 {/* Targeting Frame */}
