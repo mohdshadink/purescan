@@ -253,8 +253,8 @@ export default function Home() {
                         <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
                           <Video className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Live Cam</h3>
-                        <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Detect while shopping</p>
+                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Smart Vision</h3>
+                        <p className="text-[var(--foreground)] opacity-50 text-sm font-medium text-center">Real-time AI targeting with manual scope. Identify produce, meats, and ingredient labels instantly.</p>
                       </div>
                     </HolographicCard>
                   </div>

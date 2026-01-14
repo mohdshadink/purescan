@@ -20,12 +20,18 @@ interface DetectedObject {
     score: number;
 }
 
-// Food items we want to detect (expanded to include containers)
+// Food items and context clues we want to detect (expanded for meat/kitchen contexts)
 // NOTE: COCO-SSD model has a limited vocabulary of ~80 classes.
-// It supports: banana, apple, orange, broccoli, carrot, bowl, cup, potted plant
-// It does NOT support: watermelon, grapes, strawberry, etc.
-// For complete freshness analysis, users should capture and send to Gemini API.
-const FOOD_ITEMS = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant', 'bowl', 'cup'];
+// Direct food items: banana, apple, orange, broccoli, carrot, hot dog, sandwich, pizza
+// Context clues for meat/raw food: dining table, microwave, oven, sink, refrigerator, bowl, cup
+// It does NOT support: raw meat, watermelon, grapes, strawberry, etc.
+// For complete freshness analysis (especially raw meat), users should capture and send to Gemini API.
+const FOOD_ITEMS = [
+    // Direct food items
+    'banana', 'apple', 'orange', 'broccoli', 'carrot', 'hot dog', 'sandwich', 'pizza',
+    // Containers and kitchen context (helps detect meat preparation areas)
+    'bowl', 'cup', 'dining table', 'microwave', 'oven', 'sink', 'refrigerator'
+];
 
 export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDetection = false }: CameraModalProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -357,6 +363,32 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                             className="absolute inset-0 w-full h-full pointer-events-none"
                                         />
                                     )}
+
+                                    {/* Manual Targeting Scope (Permanent) - Only in Live Mode */}
+                                    {enableLiveDetection && !isModelLoading && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="relative">
+                                                {/* Targeting Frame */}
+                                                <div className="w-64 h-64 border-2 border-white/40 rounded-xl relative">
+                                                    {/* Corner Markers */}
+                                                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl"></div>
+                                                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-xl"></div>
+                                                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-xl"></div>
+                                                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-xl"></div>
+                                                    {/* Center Crosshair */}
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-6 h-0.5 bg-white/60"></div>
+                                                        <div className="absolute w-0.5 h-6 bg-white/60"></div>
+                                                    </div>
+                                                </div>
+                                                {/* Label Below Frame */}
+                                                <p className="text-white text-sm font-semibold text-center mt-3 drop-shadow-lg">
+                                                    Place Food / Meat Here
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Model Loading Indicator - Only in Live Mode */}
                                     {enableLiveDetection && isModelLoading && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -397,7 +429,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                     {/* Explanatory Label - Only in Live Mode */}
                                     {enableLiveDetection && (
                                         <p className="text-white/40 text-xs text-center font-medium">
-                                            Live Targeting: Detecting basic shapes...
+                                            Green Box: Auto-Detect | Center Scope: Manual Scan
                                         </p>
                                     )}
                                 </>
