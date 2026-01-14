@@ -36,10 +36,14 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     const [permissionError, setPermissionError] = useState<boolean>(false);
     const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
     const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
+    const [isCapturing, setIsCapturing] = useState<boolean>(false); // NEW: State for capture UI feedback
     const detectionFrameRef = useRef<number | null>(null);
 
     // Use a ref to track the stream for cleanup to avoid dependency cycles
     const streamRef = useRef<MediaStream | null>(null);
+
+    // NEW: Ref to store last predictions for persistence (prevent flickering)
+    const lastPredictionsRef = useRef<{ predictions: DetectedObject[], timestamp: number }>({ predictions: [], timestamp: 0 });
 
     const startCamera = useCallback(async () => {
         try {
@@ -101,7 +105,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
         }
     }, []);
 
-    // Detection loop
+    // Detection loop with persistence logic
     const runDetection = useCallback(async () => {
         if (!model || !videoRef.current || !overlayCanvasRef.current || !stream) {
             return;
@@ -124,17 +128,40 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         try {
-            // Run detection with very low confidence threshold (0.20 = 20%) to maximize stability
-            // This prevents bounding boxes from flickering when confidence hovers around 50%
+            // Run detection with low confidence threshold (0.20 = 20%) for easier detection
             // Parameters: detect(video, maxDetections, scoreThreshold)
-            const predictions = await model.detect(video, 20, 0.20);
+            const currentPredictions = await model.detect(video, 20, 0.20);
 
-            // Filter for food items and draw bounding boxes
-            const foodDetections = predictions.filter((prediction: DetectedObject) =>
+            // Filter for food items
+            const foodDetections = currentPredictions.filter((prediction: DetectedObject) =>
                 FOOD_ITEMS.includes(prediction.class.toLowerCase())
             );
 
-            foodDetections.forEach((prediction: DetectedObject, index: number) => {
+            // PERSISTENCE LOGIC: Update ref if we have detections, otherwise use stored predictions
+            let detectionsToRender: DetectedObject[];
+
+            if (foodDetections.length > 0) {
+                // NEW detections found - update ref and use them
+                lastPredictionsRef.current = {
+                    predictions: foodDetections,
+                    timestamp: Date.now()
+                };
+                detectionsToRender = foodDetections;
+            } else {
+                // NO detections - check if we should persist old ones
+                const timeSinceLastDetection = Date.now() - lastPredictionsRef.current.timestamp;
+
+                if (timeSinceLastDetection < 2000) {
+                    // Less than 2 seconds - keep showing stored predictions
+                    detectionsToRender = lastPredictionsRef.current.predictions;
+                } else {
+                    // More than 2 seconds - clear boxes
+                    detectionsToRender = [];
+                }
+            }
+
+            // Draw bounding boxes for detectionsToRender
+            detectionsToRender.forEach((prediction: DetectedObject, index: number) => {
                 const [x, y, width, height] = prediction.bbox;
                 const confidence = Math.round(prediction.score * 100);
 
@@ -162,8 +189,8 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 ctx.fillText(label, x + padding, y - padding);
             });
 
-            // Show "Searching..." if no food detected
-            if (foodDetections.length === 0) {
+            // Show "Searching..." if no detections to render
+            if (detectionsToRender.length === 0) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                 ctx.font = 'bold 20px Arial';
                 const searchText = 'Searching for food...';
@@ -232,27 +259,51 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     }, [stream]);
 
     const handleCapture = () => {
-        if (videoRef.current && canvasRef.current) {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
+        // Use requestAnimationFrame to ensure UI updates first (isCapturing state)
+        requestAnimationFrame(() => {
+            setIsCapturing(true);
 
-            // Match canvas size to video size
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            if (videoRef.current && canvasRef.current) {
+                const video = videoRef.current;
+                const canvas = canvasRef.current;
+                const overlayCanvas = overlayCanvasRef.current;
 
-            const context = canvas.getContext('2d');
-            if (context) {
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                // Match canvas size to video size
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
 
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-                        onCapture(file);
-                        onClose();
+                const context = canvas.getContext('2d');
+                if (context) {
+                    if (enableLiveDetection && overlayCanvas) {
+                        // LIVE DETECTION MODE: Burn boxes into photo
+                        // Draw video frame first
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        // Then draw the overlay canvas (with bounding boxes) on top
+                        context.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height);
+                    } else {
+                        // REGULAR MODE: Clean video frame only
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
                     }
-                }, 'image/jpeg', 0.95);
+
+                    // Capture with 0.8 quality for speed (as requested)
+                    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                    // Convert data URL to Blob
+                    fetch(imageDataUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+                            onCapture(file);
+                            onClose();
+                            setIsCapturing(false);
+                        })
+                        .catch(err => {
+                            console.error("Failed to capture image:", err);
+                            setIsCapturing(false);
+                        });
+                }
             }
-        }
+        });
     };
 
     const triggerFallback = () => {
@@ -333,9 +384,14 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                 <>
                                     <button
                                         onClick={handleCapture}
-                                        className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group"
+                                        disabled={isCapturing}
+                                        className="h-16 w-16 rounded-full border-4 border-white/20 flex items-center justify-center bg-white hover:scale-105 active:scale-95 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                                     >
-                                        <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
+                                        {isCapturing ? (
+                                            <RefreshCw className="h-8 w-8 animate-spin text-[#111]" />
+                                        ) : (
+                                            <div className="h-12 w-12 rounded-full border-2 border-[#111] bg-white group-hover:bg-blue-500 transition-colors" />
+                                        )}
                                     </button>
 
                                     {/* Explanatory Label - Only in Live Mode */}

@@ -99,6 +99,33 @@ FIRST, determine the image type:
 - OR is it a text label/packaging (MODE B) - ingredient lists, nutrition facts, product labels?
 
 ========================================
+[SCENARIO: IMAGES WITH DETECTED OBJECT BOXES]
+========================================
+IMPORTANT: Some images may contain green bounding boxes with labels (e.g., "apple 90%", "banana 75%").
+
+These boxes are from a live detection system that highlights objects in the scene.
+
+CRITICAL RULES for handling boxed images:
+1. USE BOXES AS REFERENCE POINTS:
+   - In your findings, reference the box locations to be specific.
+   - DON'T say: "The apple is rotten"
+   - DO say: "⚠️ The apple inside the top-left green box shows signs of decay"
+   - DO say: "✅ The banana in the center green box appears perfectly ripe"
+
+2. VERIFY AND CORRECT MISIDENTIFICATIONS:
+   - The detection labels may be incorrect (limited AI vocabulary).
+   - If you see a box labeled "carrot" but it's clearly a chili pepper, correct it:
+     "⚠️ The object labeled 'carrot' in the bottom box is actually a rotting chili pepper with visible fungus."
+
+3. LOCATION REFERENCES:
+   - Use spatial language: "top-left box", "center box", "bottom-right box", "leftmost box"
+   - If multiple boxes of the same item, distinguish them: "The apple in the upper box is fresh, but the apple in the lower box is bruised."
+
+4. WHEN THERE ARE NO BOXES:
+   - If no green boxes are present, proceed with normal analysis.
+   - Your findings should still be specific but without referencing boxes.
+
+========================================
 [MODE A: VISUAL FOOD ANALYSIS]
 ========================================
 Applies to: Physical food items (fruit, vegetables, meals, etc.)
