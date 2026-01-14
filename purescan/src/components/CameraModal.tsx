@@ -171,17 +171,32 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 const [x, y, width, height] = prediction.bbox;
                 const confidence = Math.round(prediction.score * 100);
 
-                // Color palette for different items
-                const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
-                const color = colors[index % colors.length];
+                // FORCE BRIGHT GREEN COLOR for all boxes (consistency with "Green Box" instruction)
+                const color = '#00FF00';
+
+                // LABEL MAPPING: Sanitize misleading labels (e.g., steak detected as "pizza")
+                let displayLabel: string;
+                const className = prediction.class.toLowerCase();
+
+                if (['sandwich', 'hot dog', 'pizza', 'donut', 'cake'].includes(className)) {
+                    displayLabel = 'Detected Dish';
+                } else if (className === 'potted plant') {
+                    displayLabel = 'Fresh Produce';
+                } else if (['carrot', 'broccoli', 'banana', 'apple', 'orange'].includes(className)) {
+                    // Keep original label for these items (capitalize first letter)
+                    displayLabel = className.charAt(0).toUpperCase() + className.slice(1);
+                } else {
+                    // For any other class, use generic "Food Item"
+                    displayLabel = 'Food Item';
+                }
 
                 // Draw bounding box
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 3;
                 ctx.strokeRect(x, y, width, height);
 
-                // Draw label background
-                const label = `${prediction.class} (${confidence}%)`;
+                // Draw label background with sanitized label
+                const label = `${displayLabel} (${confidence}%)`;
                 ctx.font = 'bold 16px Arial';
                 const textMetrics = ctx.measureText(label);
                 const textHeight = 20;
@@ -191,7 +206,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 ctx.fillRect(x, y - textHeight - padding, textMetrics.width + padding * 2, textHeight + padding);
 
                 // Draw label text
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#000000'; // Black text for better contrast on bright green
                 ctx.fillText(label, x + padding, y - padding);
             });
 
@@ -232,9 +247,17 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     useEffect(() => {
         if (isOpen) {
             startCamera();
+
             // Only load TensorFlow model if live detection is enabled
             if (enableLiveDetection && !model) {
+                setIsModelLoading(true); // Reset loading state for live mode
                 loadModel();
+            } else if (!enableLiveDetection) {
+                // Normal camera mode - no loading needed
+                setIsModelLoading(false);
+            } else if (enableLiveDetection && model) {
+                // Model already loaded
+                setIsModelLoading(false);
             }
         } else {
             stopCamera();
@@ -391,10 +414,11 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
 
                                     {/* Model Loading Indicator - Only in Live Mode */}
                                     {enableLiveDetection && isModelLoading && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
                                             <div className="text-white text-center">
-                                                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-                                                <p className="text-sm">Loading AI Model...</p>
+                                                <RefreshCw className="h-12 w-12 animate-spin mx-auto mb-4 text-green-400" />
+                                                <p className="text-lg font-bold mb-1">Initializing Smart Vision</p>
+                                                <p className="text-sm opacity-60">Loading AI detection model...</p>
                                             </div>
                                         </div>
                                     )}

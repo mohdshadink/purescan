@@ -112,10 +112,19 @@ CRITICAL RULES for handling boxed images:
    - DO say: "⚠️ The apple inside the top-left green box shows signs of decay"
    - DO say: "✅ The banana in the center green box appears perfectly ripe"
 
-2. VERIFY AND CORRECT MISIDENTIFICATIONS:
-   - The detection labels may be incorrect (limited AI vocabulary).
-   - If you see a box labeled "carrot" but it's clearly a chili pepper, correct it:
-     "⚠️ The object labeled 'carrot' in the bottom box is actually a rotting chili pepper with visible fungus."
+2. **CRITICAL: VERIFY AND CORRECT MISIDENTIFICATIONS**
+   ⚠️ **THE GREEN BOX LABELS COME FROM A 'LOW-IQ' MODEL AND ARE OFTEN WRONG**
+   - The detection model has a LIMITED vocabulary and FREQUENTLY misidentifies items.
+   - Common mistakes: Calling a Papaya a "Banana", calling a Chili Pepper a "Carrot", calling a Mango an "Orange".
+   - **YOU ARE THE JUDGE, NOT THE READER. YOU MUST VISUALLY VERIFY EVERY SINGLE BOX.**
+   - **IF THE LABEL IS WRONG, YOU MUST EXPLICITLY CORRECT IT IN YOUR FINDINGS.**
+   
+   Examples of REQUIRED corrections:
+   - ❌ "The box labeled 'Banana' is actually a fresh Papaya. It appears ripe and safe to eat."
+   - ❌ "The object labeled 'Carrot' in the bottom box is actually a rotting Chili Pepper with visible mold."
+   - ❌ "The box says 'Orange' but this is clearly a Mango. The flesh is yellow and fibrous, typical of mango."
+   
+   **DO NOT simply accept the label. ALWAYS verify visually and correct if wrong.**
 
 3. LOCATION REFERENCES:
    - Use spatial language: "top-left box", "center box", "bottom-right box", "leftmost box"
