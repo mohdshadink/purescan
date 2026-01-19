@@ -42,9 +42,6 @@ export default function Home() {
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-  // Ref not strictly needed with label wrap, but keeping for safety if needed later, though removing direct click handler
-  // const cameraInputRef = useRef<HTMLInputElement>(null); // Removed unused ref
-
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -106,8 +103,6 @@ export default function Home() {
     setFiles([]);
     setPreviewUrl(null);
     clearError();
-    // Maintain theme on reload if possible, but for now simple reload refetches default
-    // Ideally we don't fully reload window, just reset state, but keeping existing logic:
     window.location.reload();
   };
 
@@ -117,18 +112,22 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center relative isolate overflow-hidden font-sans transition-colors duration-700 ease-in-out -mt-16 pt-16"
       style={{ color: 'var(--foreground)' }}>
 
+      {/* DYNAMIC RADIAL GRADIENT BACKGROUND - Premium Depth */}
+      <div className="fixed inset-0 -z-40" style={{
+        background: isDarkMode
+          ? 'radial-gradient(circle at center, rgba(255, 186, 0, 0.15) 0%, rgba(12, 59, 46, 1) 70%)'
+          : 'radial-gradient(circle at center, rgba(255, 255, 255, 1) 0%, rgba(243, 244, 241, 1) 70%)'
+      }} />
+
       {/* Theme Toggle (Absolute Top Right) */}
 
 
 
-      {/* Dynamic Background Blobs */}
-      <div className="fixed -top-10 -left-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-indigo-500/60 dark:bg-emerald-900/30 -z-50 will-change-transform translate-z-0 transform-gpu" />
-      <div className="fixed -top-10 -right-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-fuchsia-500/60 dark:bg-purple-500/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
-      <div className="fixed bottom-10 left-1/3 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-blue-500/60 dark:bg-indigo-900/30 -z-50 will-change-transform translate-z-0 transform-gpu" />
+      {/* Dynamic Background Blobs - Organic Theme */}
+      <div className="fixed -top-10 -left-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-organic-earth/40 dark:bg-organic-sage/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
+      <div className="fixed -top-10 -right-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-organic-gold/30 dark:bg-organic-earth/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
+      <div className="fixed bottom-10 left-1/3 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-organic-sage/40 dark:bg-organic-dark/60 -z-50 will-change-transform translate-z-0 transform-gpu" />
       <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none -z-50" />
-
-      {/* Note: Navbar component was removed from previous hierarchy as per design changes request potentially? */}
-      {/* Keeping empty space if needed or just removing it since Layout has header now */}
 
       <div className="flex-1 w-full max-w-5xl flex flex-col items-center justify-center space-y-10 relative z-10 px-4 py-8 md:py-12">
 
@@ -139,9 +138,6 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="text-center space-y-4 max-w-3xl"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-glass border border-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[var(--color-primary)] shadow-lg">
-            <Zap size={12} className="fill-current" /> Bio-Organic Analysis v1.0
-          </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight pb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] drop-shadow-sm">
@@ -189,16 +185,21 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-white/5 border border-white/10'
-                          : 'bg-white border border-gray-200 shadow-xl'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
-                          <Camera className="h-8 w-8" />
+                        <div className="relative mb-4">
+                          {/* Glow Circle */}
+                          <div className="absolute inset-0 bg-organic-gold/20 rounded-2xl blur-md" />
+                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'
+                            }`}>
+                            <Camera className="h-8 w-8 text-organic-gold" />
+                          </div>
                         </div>
                         <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
@@ -209,10 +210,10 @@ export default function Home() {
                     <HolographicCard
                       isActive={isDragActive}
                       className={`
-                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-white/5 border border-white/10'
-                          : 'bg-white border border-gray-200 shadow-xl'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
                         }
                       `}
                     >
@@ -225,8 +226,13 @@ export default function Home() {
                             e.stopPropagation();
                           }}
                         />
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-green-400' : 'bg-green-50 border-green-100 text-green-600'}`}>
-                          <UploadCloud className="h-8 w-8" />
+                        <div className="relative mb-4">
+                          {/* Glow Circle */}
+                          <div className="absolute inset-0 bg-organic-sage/20 rounded-2xl blur-md" />
+                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'
+                            }`}>
+                            <UploadCloud className="h-8 w-8 text-organic-sage" />
+                          </div>
                         </div>
                         <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
@@ -242,16 +248,21 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        w-full flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer
+                        w-full flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-white/5 border border-white/10'
-                          : 'bg-white border border-gray-200 shadow-xl'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-white/5 border-white/5 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
-                          <Video className="h-8 w-8" />
+                        <div className="relative mb-4">
+                          {/* Glow Circle */}
+                          <div className="absolute inset-0 bg-teal-500/20 rounded-2xl blur-md" />
+                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'
+                            }`}>
+                            <Video className="h-8 w-8 text-teal-500" />
+                          </div>
                         </div>
                         <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Smart Vision</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium text-center">Real-time AI targeting with manual scope. Identify produce, meats, and ingredient labels instantly.</p>
@@ -360,6 +371,13 @@ export default function Home() {
             enableLiveDetection={isLiveMode}
           />
 
+        </div>
+      </div>
+
+      {/* Bio-Organic Badge - Moved to Footer */}
+      <div className="w-full flex justify-center pb-4 relative z-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium uppercase tracking-widest text-organic-sage/50 dark:text-organic-sage/40">
+          <Zap size={10} className="opacity-50" /> Bio-Organic Analysis v1.0
         </div>
       </div>
 

@@ -323,7 +323,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
                         exit={{ scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+                        className="relative w-full max-w-lg bg-organic-dark rounded-3xl overflow-hidden border border-organic-sage/20 shadow-2xl"
                     >
                         {/* Header */}
                         <div className="absolute top-0 inset-x-0 p-4 flex justify-end items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
@@ -396,7 +396,7 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                         </div>
 
                         {/* Controls */}
-                        <div className="p-6 bg-[#111] flex flex-col items-center gap-4">
+                        <div className="p-6 bg-organic-dark/80 flex flex-col items-center gap-4">
                             {!permissionError ? (
                                 <>
                                     <button

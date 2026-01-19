@@ -12,55 +12,56 @@
 
 /* THEME VARIABLES */
 :root {
-  /* Default to Dark Mode (Cyberpunk identity) */
-  --background: #0a0a0a;
-  --foreground: #e0e0e0;
+  /* Default to Dark Mode (Earth Tone / Organic) */
+  --background: #0C3B2E;
+  --foreground: #F3F4F1;
 
   /* Color Palette */
-  --color-primary: #00ff00;
-  /* Neon Green */
-  --color-secondary: #002200;
+  --color-primary: #FFBA00;
+  /* Mustard Gold */
+  --color-secondary: #6D9773;
+  /* Sage Green */
 
   /* UI Elements */
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(255, 255, 255, 0.05);
+  --card-bg: rgba(12, 59, 46, 0.4);
+  --card-border: rgba(109, 151, 115, 0.3);
+  --input-bg: rgba(12, 59, 46, 0.3);
 
   /* Text Gradients */
-  --gradient-start: #4ade80;
-  /* Green 400 */
-  --gradient-mid: #2dd4bf;
-  /* Teal 400 */
-  --gradient-end: #3b82f6;
-  /* Blue 500 */
+  --gradient-start: #6D9773;
+  /* Sage Green */
+  --gradient-mid: #BB8A52;
+  /* Earth Brown */
+  --gradient-end: #FFBA00;
+  /* Mustard Gold */
 }
 
-/* LIGHT MODE OVERRIDES ("Pinteresty" Aesthetic) */
+/* LIGHT MODE OVERRIDES (Organic / Earth Tone) */
 /* We use a class .light on the body/main to toggle this */
 .light {
-  /* Soft Cream Background */
-  --background: #faf9f6;
+  /* Cream / Off-White Background */
+  --background: #F3F4F1;
   /* Charcoal Text */
   --foreground: #1f2937;
 
-  /* Sage Green / Earthy Primary */
-  --color-primary: #059669;
-  /* Emerald 600 */
-  --color-secondary: #ecfdf5;
-  /* Emerald 50 */
+  /* Sage Green Primary */
+  --color-primary: #6D9773;
+  /* Sage Green */
+  --color-secondary: #BB8A52;
+  /* Earth Brown */
 
-  /* Clean White Cards with soft shadow */
+  /* Clean White Cards with earth-tone borders */
   --card-bg: rgba(255, 255, 255, 0.8);
-  --card-border: rgba(0, 0, 0, 0.05);
+  --card-border: rgba(187, 138, 82, 0.2);
   --input-bg: rgba(255, 255, 255, 1);
 
-  /* Softer Gradient */
-  --gradient-start: #059669;
-  /* Emerald 600 */
-  --gradient-mid: #14b8a6;
-  /* Teal 500 */
-  --gradient-end: #0ea5e9;
-  /* Sky 500 */
+  /* Earth Tone Gradient */
+  --gradient-start: #6D9773;
+  /* Sage Green */
+  --gradient-mid: #BB8A52;
+  /* Earth Brown */
+  --gradient-end: #FFBA00;
+  /* Mustard Gold */
 }
 
 /* Base Styles */

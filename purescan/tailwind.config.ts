@@ -12,6 +12,11 @@ const config: Config = {
                 background: "var(--background)",
                 foreground: "var(--foreground)",
                 neon: "var(--primary)",
+                "organic-dark": "#0C3B2E",
+                "organic-sage": "#6D9773",
+                "organic-earth": "#BB8A52",
+                "organic-gold": "#FFBA00",
+                "organic-light": "#F3F4F1",
             },
             fontFamily: {
                 sans: ["var(--font-geist-sans)", "Arial", "sans-serif"],
