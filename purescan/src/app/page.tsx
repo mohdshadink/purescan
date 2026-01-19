@@ -193,13 +193,9 @@ export default function Home() {
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className="relative mb-5">
-                          {/* Glow Circle */}
-                          <div className="absolute inset-0 bg-organic-gold/20 rounded-2xl blur-md" />
-                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'
-                            }`}>
-                            <Camera className="h-8 w-8 text-organic-gold" />
-                          </div>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'
+                          }`}>
+                          <Camera className="h-8 w-8 text-organic-gold" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Scan with Camera</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
@@ -226,13 +222,9 @@ export default function Home() {
                             e.stopPropagation();
                           }}
                         />
-                        <div className="relative mb-5">
-                          {/* Glow Circle */}
-                          <div className="absolute inset-0 bg-organic-sage/20 rounded-2xl blur-md" />
-                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'
-                            }`}>
-                            <UploadCloud className="h-8 w-8 text-organic-sage" />
-                          </div>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'
+                          }`}>
+                          <UploadCloud className="h-8 w-8 text-organic-sage" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
@@ -256,13 +248,9 @@ export default function Home() {
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className="relative mb-5">
-                          {/* Glow Circle */}
-                          <div className="absolute inset-0 bg-teal-500/20 rounded-2xl blur-md" />
-                          <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'
-                            }`}>
-                            <Video className="h-8 w-8 text-teal-500" />
-                          </div>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'
+                          }`}>
+                          <Video className="h-8 w-8 text-teal-400" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Smart Vision</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium text-center">Real-time AI targeting with manual scope. Identify produce, meats, and ingredient labels instantly.</p>
