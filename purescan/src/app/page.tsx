@@ -185,15 +185,15 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
-                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className="relative mb-4">
+                        <div className="relative mb-5">
                           {/* Glow Circle */}
                           <div className="absolute inset-0 bg-organic-gold/20 rounded-2xl blur-md" />
                           <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'
@@ -201,7 +201,7 @@ export default function Home() {
                             <Camera className="h-8 w-8 text-organic-gold" />
                           </div>
                         </div>
-                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Scan with Camera</h3>
+                        <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Scan with Camera</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Take Photo</p>
                       </div>
                     </HolographicCard>
@@ -210,10 +210,10 @@ export default function Home() {
                     <HolographicCard
                       isActive={isDragActive}
                       className={`
-                        flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
-                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
                     >
@@ -226,7 +226,7 @@ export default function Home() {
                             e.stopPropagation();
                           }}
                         />
-                        <div className="relative mb-4">
+                        <div className="relative mb-5">
                           {/* Glow Circle */}
                           <div className="absolute inset-0 bg-organic-sage/20 rounded-2xl blur-md" />
                           <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'
@@ -234,7 +234,7 @@ export default function Home() {
                             <UploadCloud className="h-8 w-8 text-organic-sage" />
                           </div>
                         </div>
-                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
+                        <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium">Upload File</p>
                       </div>
                     </HolographicCard>
@@ -248,15 +248,15 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        w-full flex flex-col items-center justify-center p-8 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        w-full flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105'
-                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105'
+                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className="relative mb-4">
+                        <div className="relative mb-5">
                           {/* Glow Circle */}
                           <div className="absolute inset-0 bg-teal-500/20 rounded-2xl blur-md" />
                           <div className={`relative p-4 rounded-2xl shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'
@@ -264,7 +264,7 @@ export default function Home() {
                             <Video className="h-8 w-8 text-teal-500" />
                           </div>
                         </div>
-                        <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">Smart Vision</h3>
+                        <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Smart Vision</h3>
                         <p className="text-[var(--foreground)] opacity-50 text-sm font-medium text-center">Real-time AI targeting with manual scope. Identify produce, meats, and ingredient labels instantly.</p>
                       </div>
                     </HolographicCard>
