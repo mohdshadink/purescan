@@ -399,6 +399,10 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                         playsInline
                                         muted
                                         className="w-full h-full object-cover rounded-2xl"
+                                        onLoadedMetadata={() => {
+                                            // Force play once metadata is loaded (critical for mobile)
+                                            videoRef.current?.play().catch(e => console.error("Play error:", e));
+                                        }}
                                     />
 
                                     {/* Detection Canvas */}
