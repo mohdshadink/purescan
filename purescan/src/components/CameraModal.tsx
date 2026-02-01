@@ -60,12 +60,12 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 return;
             }
 
-            // PROFESSIONAL GRADE: Request maximum 4K resolution
+            // MOBILE-SAFE HD: Request 1080p resolution (4K crashes mobile browsers)
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: "environment",
-                    width: { ideal: 4096 },
-                    height: { ideal: 2160 }
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
                 }
             });
 
@@ -74,6 +74,8 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
             setPermissionError(false);
         } catch (err) {
             console.error("Camera access denied:", err);
+            const errorMessage = err instanceof Error ? err.message : "Unknown camera error";
+            alert("Camera Error: " + errorMessage);
             setPermissionError(true);
         }
     }, []);
