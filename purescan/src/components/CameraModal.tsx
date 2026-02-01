@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Camera, RefreshCw } from "lucide-react";
+import { X, Camera, RefreshCw, Zap, Lightbulb } from "lucide-react";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 import "@tensorflow/tfjs-backend-cpu";
@@ -35,6 +35,8 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isCapturing, setIsCapturing] = useState<boolean>(false);
+    const [isFlashOn, setIsFlashOn] = useState<boolean>(false);
+    const [showLightingTip, setShowLightingTip] = useState<boolean>(false);
     const detectionFrameRef = useRef<number | null>(null);
 
     const streamRef = useRef<MediaStream | null>(null);
@@ -50,8 +52,21 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                 streamRef.current.getTracks().forEach(track => track.stop());
             }
 
+            // SAFETY CHECK: Ensure navigator.mediaDevices is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error("navigator.mediaDevices not available");
+                setPermissionError(true);
+                alert("Camera access requires HTTPS or Localhost. Please use the Vercel deployment link or run on localhost.");
+                return;
+            }
+
+            // PROFESSIONAL GRADE: Request maximum 4K resolution
             const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 4096 },
+                    height: { ideal: 2160 }
+                }
             });
 
             streamRef.current = mediaStream;
@@ -222,6 +237,10 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
     useEffect(() => {
         if (isOpen) {
             startCamera();
+            // Show lighting tip when camera opens
+            setShowLightingTip(true);
+            // Auto-hide tip after 5 seconds
+            const tipTimer = setTimeout(() => setShowLightingTip(false), 5000);
 
             if (enableLiveDetection) {
                 if (!model) {
@@ -232,9 +251,12 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                     setTimeout(() => setIsLoading(false), 2000);
                 }
             }
+
+            return () => clearTimeout(tipTimer);
         } else {
             stopCamera();
             setIsLoading(false);
+            setShowLightingTip(false);
             if (detectionFrameRef.current) {
                 cancelAnimationFrame(detectionFrameRef.current);
                 detectionFrameRef.current = null;
@@ -310,6 +332,26 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
         }
     };
 
+    // PROFESSIONAL GRADE: Toggle Flash/Torch
+    const toggleFlash = async () => {
+        if (!stream) return;
+
+        try {
+            const track = stream.getVideoTracks()[0];
+            const newFlashState = !isFlashOn;
+
+            // Apply torch constraint (not all devices support this)
+            await track.applyConstraints({
+                // @ts-ignore - advanced is not in the TS types but is valid
+                advanced: [{ torch: newFlashState }]
+            });
+
+            setIsFlashOn(newFlashState);
+        } catch (err) {
+            console.warn("Flash/torch not supported on this device:", err);
+        }
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -326,7 +368,20 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                         className="relative w-full max-w-lg bg-organic-dark rounded-3xl overflow-hidden border border-organic-sage/20 shadow-2xl"
                     >
                         {/* Header */}
-                        <div className="absolute top-0 inset-x-0 p-4 flex justify-end items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
+                        <div className="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-20 bg-gradient-to-b from-black/80 to-transparent">
+                            {/* Flash Toggle Button */}
+                            <button
+                                onClick={toggleFlash}
+                                disabled={!stream || permissionError}
+                                className={`p-2 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed ${isFlashOn
+                                    ? 'bg-organic-gold/80 text-organic-dark shadow-lg shadow-organic-gold/50'
+                                    : 'bg-white/10 text-white hover:bg-white/20'
+                                    }`}
+                            >
+                                <Zap className={`h-5 w-5 ${isFlashOn ? 'fill-current' : ''}`} />
+                            </button>
+
+                            {/* Close Button */}
                             <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                                 <X className="h-5 w-5 text-white" />
                             </button>
@@ -383,6 +438,34 @@ export default function CameraModal({ isOpen, onClose, onCapture, enableLiveDete
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* LIGHTING TIP MESSAGE */}
+                                    <AnimatePresence>
+                                        {showLightingTip && !isLoading && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -20 }}
+                                                className="absolute bottom-4 left-4 right-4 bg-organic-gold/90 backdrop-blur-sm text-organic-dark px-4 py-3 rounded-xl shadow-lg z-30"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <Lightbulb className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-semibold mb-1">💡 Lighting Tip</p>
+                                                        <p className="text-xs opacity-90">
+                                                            Ensure good lighting for best results. Use the ⚡ flash button (top-left) in low light.
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setShowLightingTip(false)}
+                                                        className="text-organic-dark/70 hover:text-organic-dark transition-colors"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </>
                             )}
 
