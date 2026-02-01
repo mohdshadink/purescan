@@ -12,6 +12,7 @@ import CameraModal from "@/components/CameraModal";
 import HolographicCard from "@/components/HolographicCard";
 import { useVoice } from "@/hooks/useVoice";
 import { useTheme } from "next-themes";
+import FloatingLines from "@/components/FloatingLines";
 
 // Hack to fix Vercel build error with react-dropzone and framer-motion types
 const MotionDivAsAny = motion.div as any;
@@ -21,7 +22,7 @@ export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [isLiveMode, setIsLiveMode] = useState(false); // NEW: Track if live detection is enabled
+  const [isLiveMode, setIsLiveMode] = useState(false);
   const { analyze, isLoading, error, result, clearError } = useAnalysis();
   const { speak } = useVoice();
   const { theme, setTheme } = useTheme();
@@ -50,12 +51,11 @@ export default function Home() {
       setPreviewUrl(URL.createObjectURL(file));
       clearError();
       analyze([file]);
-      // Reset value to allow re-selection
       event.target.value = '';
     }
   };
 
-  const isDarkMode = theme === 'dark' || !theme; // Default to dark safe
+  const isDarkMode = theme === 'dark' || !theme;
 
   // Background Glow Logic
   const getBackgroundGlow = () => {
@@ -106,30 +106,31 @@ export default function Home() {
     window.location.reload();
   };
 
-  if (!mounted) return null; // Avoid hydration mismatch
+  if (!mounted) return null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center relative isolate overflow-hidden font-sans transition-colors duration-700 ease-in-out -mt-16 pt-16"
-      style={{ color: 'var(--foreground)' }}>
+    <main className="relative min-h-screen w-full overflow-hidden selection:bg-organic-gold/30">
 
-      {/* DYNAMIC RADIAL GRADIENT BACKGROUND - Premium Depth */}
-      <div className="fixed inset-0 -z-40" style={{
-        background: isDarkMode
-          ? 'radial-gradient(circle at center, rgba(255, 186, 0, 0.15) 0%, rgba(12, 59, 46, 1) 70%)'
-          : 'radial-gradient(circle at center, rgba(255, 255, 255, 1) 0%, rgba(243, 244, 241, 1) 70%)'
-      }} />
+      {/* FloatingLines Animated Background - Bio-Organic DNA */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-60">
+        <FloatingLines
+          linesGradient={["#FFBA00", "#6D9773", "#0C3B2E"]}
+          topWavePosition={{ x: 10.0, y: 0.5, rotate: -0.4 }}
+          middleWavePosition={{ x: 5.0, y: 0.0, rotate: 0.2 }}
+          bottomWavePosition={{ x: 2.0, y: -0.7, rotate: -1 }}
+          animationSpeed={0.8}
+          interactive={true}
+          bendRadius={2.5}
+          bendStrength={-0.6}
+          mouseDamping={0.04}
+          parallax={true}
+          parallaxStrength={0.1}
+          lineDistance={[20]}
+        />
+      </div>
 
-      {/* Theme Toggle (Absolute Top Right) */}
-
-
-
-      {/* Dynamic Background Blobs - Organic Theme */}
-      <div className="fixed -top-10 -left-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob bg-organic-earth/40 dark:bg-organic-sage/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
-      <div className="fixed -top-10 -right-10 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 bg-organic-gold/30 dark:bg-organic-earth/20 -z-50 will-change-transform translate-z-0 transform-gpu" />
-      <div className="fixed bottom-10 left-1/3 w-48 h-48 md:w-72 md:h-72 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 bg-organic-sage/40 dark:bg-organic-dark/60 -z-50 will-change-transform translate-z-0 transform-gpu" />
-      <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none -z-50" />
-
-      <div className="flex-1 w-full max-w-5xl flex flex-col items-center justify-center space-y-10 relative z-10 px-4 py-8 md:py-12">
+      {/* Content Layer */}
+      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen pt-16 px-6">
 
         {/* Modern Header */}
         <motion.div
@@ -145,7 +146,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="text-[var(--foreground)] opacity-70 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-light">
+          <p className="text-[var(--foreground)] opacity-70 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-light mb-20">
             Instantly decode food quality. Upload ingredients or products to reveal bio-organic safety, freshness, and hidden additives.
           </p>
         </motion.div>
@@ -185,16 +186,15 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          ? 'bg-white/5 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
                           : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'
-                          }`}>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-gold/10 border-organic-gold/20' : 'bg-organic-gold/5 border-organic-gold/10'}`}>
                           <Camera className="h-8 w-8 text-organic-gold" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Scan with Camera</h3>
@@ -206,9 +206,9 @@ export default function Home() {
                     <HolographicCard
                       isActive={isDragActive}
                       className={`
-                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          ? 'bg-white/5 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
                           : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
@@ -222,8 +222,7 @@ export default function Home() {
                             e.stopPropagation();
                           }}
                         />
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'
-                          }`}>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-organic-sage/10 border-organic-sage/20' : 'bg-organic-sage/5 border-organic-sage/10'}`}>
                           <UploadCloud className="h-8 w-8 text-organic-sage" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Tap to Analyze</h3>
@@ -240,16 +239,15 @@ export default function Home() {
                         setIsCameraOpen(true);
                       }}
                       className={`
-                        w-full flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer backdrop-blur-md transition-all shadow-xl
+                        w-full flex flex-col items-center justify-center p-10 rounded-3xl cursor-pointer transition-all shadow-xl
                         ${isDarkMode
-                          ? 'bg-organic-dark/20 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
+                          ? 'bg-white/5 border border-white/10 hover:border-organic-gold/50 hover:scale-105 hover:shadow-2xl'
                           : 'bg-white/80 border border-black/5 hover:border-organic-gold/30 hover:scale-105 hover:shadow-2xl'
                         }
                       `}
                     >
                       <div className="flex flex-col items-center">
-                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'
-                          }`}>
+                        <div className={`p-4 rounded-2xl mb-4 shadow-inner border ${isDarkMode ? 'bg-teal-500/10 border-teal-500/20' : 'bg-teal-500/5 border-teal-500/10'}`}>
                           <Video className="h-8 w-8 text-teal-400" />
                         </div>
                         <h3 className="text-xl font-semibold text-[var(--foreground)] mb-1">Smart Vision</h3>
@@ -360,16 +358,16 @@ export default function Home() {
           />
 
         </div>
-      </div>
 
-      {/* Bio-Organic Badge - Moved to Footer */}
-      <div className="w-full flex justify-center pb-4 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium uppercase tracking-widest text-organic-sage/50 dark:text-organic-sage/40">
-          <Zap size={10} className="opacity-50" /> Bio-Organic Analysis v1.0
+        {/* Footer Text */}
+        <div className="w-full flex justify-center pb-4 mt-24">
+          <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium uppercase tracking-widest text-organic-sage/50 dark:text-organic-sage/40">
+            <Zap size={10} className="opacity-50" /> Bio-Organic Analysis v1.0
+          </div>
         </div>
-      </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </main>
   );
 }
